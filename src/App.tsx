@@ -7,7 +7,7 @@ import { Header } from './components/Header'
 import { HistorySheet } from './components/HistorySheet'
 import { ShieldIcon } from './components/icons'
 import { Menu, type Prefs } from './components/Menu'
-import { Onboarding, type Preferences } from './components/Onboarding'
+import { EMPTY_PREFERENCES, Onboarding, type Preferences } from './components/Onboarding'
 import { ResultCard } from './components/ResultCard'
 import { RulesSheet } from './components/RulesSheet'
 import { SCENES } from './game/scenes'
@@ -15,7 +15,7 @@ import { useGame } from './game/useGame'
 
 type Sheet = 'menu' | 'stake' | 'rules' | 'ambassadors' | 'history' | null
 
-const ONBOARDING_KEY = 'hotswipe.preferences'
+const ONBOARDING_KEY = 'hotswipe.preferences.v2'
 
 function loadPreferences(): Preferences | null {
   try {
@@ -127,7 +127,7 @@ export default function App() {
         {sheet === 'rules' && <RulesSheet onClose={close} />}
         {sheet === 'history' && <HistorySheet history={state.history} onClose={close} />}
         {onboarding && (
-          <Onboarding initial={preferences ?? { hair: [], body: [], ethnicity: [] }} onDone={finishOnboarding} />
+          <Onboarding initial={preferences ?? EMPTY_PREFERENCES} onDone={finishOnboarding} />
         )}
         {sheet === 'ambassadors' && (
           <AmbassadorSheet
