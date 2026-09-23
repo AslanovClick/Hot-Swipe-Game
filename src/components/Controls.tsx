@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react'
 import { BETTING_MS, COLOR_LABEL, COLORS, MULTIPLIERS, STAKE_STEPS, type Color } from '../game/config'
-import { phaseDuration, type GameState } from '../game/useGame'
+import { betCost, phaseDuration, type GameState } from '../game/useGame'
 import { ModelInfo } from './Feed'
 import { formatCoins } from './Header'
-import { CheckIcon } from './icons'
+import { CheckIcon, HeartIcon } from './icons'
+import { Toggle } from './Toggle'
 
 export const stepStake = (stake: number, dir: 1 | -1, max: number) => {
   const next = dir > 0
@@ -35,7 +36,10 @@ export function SceneHud({ state }: { state: GameState }) {
         </div>
       </div>
       <div className="scene-model">
-        <ModelInfo round={state.round} phase={phase} />
+        <ModelInfo round={state.round} phase={phase} ambassador={state.ambassador} />
+        {state.ambassador && (
+          <span className="amb-chip"><HeartIcon size={14} /> Playing with ambassador</span>
+        )}
       </div>
     </>
   )
@@ -48,15 +52,18 @@ interface Props {
   onNext: () => void
   onStake: (stake: number) => void
   onOpenStake: () => void
+  toggles: { autoBet: boolean; highRisk: boolean }
+  onToggle: (key: 'autoBet' | 'highRisk', value: boolean) => void
 }
 
-export function BetPanel({ state, onPick, onBet, onNext, onStake, onOpenStake }: Props) {
+export function BetPanel({ state, onPick, onBet, onNext, onStake, onOpenStake, toggles, onToggle }: Props) {
   const { phase, pick, outcome, stake, balance, bet } = state
   const betting = phase === 'betting'
   const shownResult = phase === 'result' || phase === 'advancing' ? outcome?.result ?? null : null
   const locked = !betting
   const lockedColor = bet?.color ?? null
-  const broke = stake > balance
+  const cost = betCost(state)
+  const broke = cost > balance
   const ref = useRef<HTMLDivElement>(null)
 
   // Exposes the dock height so scene overlays (model name, result text) sit right above it
@@ -100,8 +107,8 @@ export function BetPanel({ state, onPick, onBet, onNext, onStake, onOpenStake }:
 
       <div className="panel-row">
         <div className="block toggles">
-          <Toggle label="Auto bet" />
-          <Toggle label="High risk" />
+          <Toggle label="Auto bet" checked={toggles.autoBet} onChange={v => onToggle('autoBet', v)} />
+          <Toggle label="High risk" checked={toggles.highRisk} onChange={v => onToggle('highRisk', v)} />
         </div>
 
         <div className="block bet-block">
@@ -138,22 +145,11 @@ export function BetPanel({ state, onPick, onBet, onNext, onStake, onOpenStake }:
                   ? (bet ? 'Bet placed' : 'No bet')
                   : broke ? 'Low balance' : pick ? 'Bet' : 'Pick a color'}
               </span>
-              {betting && pick && !broke && <span className="cta-sub">{formatCoins(stake)} coins</span>}
+              {betting && pick && !broke && <span className="cta-sub">{formatCoins(cost)} coins</span>}
             </button>
           )}
         </div>
       </div>
     </div>
-  )
-}
-
-// Placeholder switches for upcoming Auto / High risk modes
-function Toggle({ label }: { label: string }) {
-  return (
-    <label className="toggle" title="Coming soon">
-      <input type="checkbox" disabled />
-      <span className="toggle-track"><span className="toggle-knob" /></span>
-      <span className="toggle-label">{label}</span>
-    </label>
   )
 }

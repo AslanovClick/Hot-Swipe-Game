@@ -19,3 +19,7 @@ export const SCENES: Scene[] = [
 ]
 
 export const sceneAt = (round: number) => SCENES[((round % SCENES.length) + SCENES.length) % SCENES.length]
+
+// With an ambassador chosen, the feed loops her scene every round
+export const sceneFor = (ambassador: string | null, round: number) =>
+  (ambassador && SCENES.find(s => s.id === ambassador)) || sceneAt(round)

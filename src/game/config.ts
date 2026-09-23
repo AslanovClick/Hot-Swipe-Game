@@ -24,3 +24,6 @@ export const ADVANCE_MS = 600
 export const START_BALANCE = 1000
 export const DEFAULT_STAKE = 10
 export const STAKE_STEPS = [1, 5, 10, 25, 50, 100, 250, 500, 1000]
+
+// Playing with an ambassador raises the cost of a round (the placed bet) by this factor
+export const AMBASSADOR_COST_MULT = 1.5

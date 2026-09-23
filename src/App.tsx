@@ -1,22 +1,35 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { AmbassadorSheet } from './components/AmbassadorSheet'
 import { BetSheet } from './components/BetSheet'
 import { BetPanel, SceneHud } from './components/Controls'
 import { Feed } from './components/Feed'
 import { Header } from './components/Header'
 import { ShieldIcon } from './components/icons'
-import { Menu } from './components/Menu'
+import { Menu, type Prefs } from './components/Menu'
 import { ResultCard } from './components/ResultCard'
 import { RulesSheet } from './components/RulesSheet'
 import { SCENES } from './game/scenes'
 import { useGame } from './game/useGame'
 
-type Sheet = 'menu' | 'stake' | 'rules' | null
+type Sheet = 'menu' | 'stake' | 'rules' | 'ambassadors' | null
 
 export default function App() {
   const [sheet, setSheet] = useState<Sheet>(null)
   const { state, dispatch } = useGame(sheet !== null)
   const { phase, outcome } = state
   const close = () => setSheet(null)
+
+  // Switches are clickable but don't drive any behavior yet
+  const [prefs, setPrefs] = useState<Prefs>({ audio: true, animation: true, quickBet: false })
+  const [toggles, setToggles] = useState({ autoBet: false, highRisk: false })
+
+  const [toast, setToast] = useState<string | null>(null)
+  const toastTimer = useRef(0)
+  const soon = (label: string) => {
+    setToast(`${label} — coming soon`)
+    clearTimeout(toastTimer.current)
+    toastTimer.current = window.setTimeout(() => setToast(null), 1800)
+  }
 
   useEffect(() => {
     for (const s of SCENES) { new Image().src = s.before; new Image().src = s.after }
@@ -31,17 +44,26 @@ export default function App() {
           balance={state.balance}
           delta={delta}
           history={state.history}
+          ambassador={state.ambassador}
           onMenu={() => setSheet('menu')}
           onInfo={() => setSheet('rules')}
+          onAmbassadors={() => setSheet('ambassadors')}
         />
 
         <section className="stage">
-          <Feed round={state.round} phase={phase} onSwipeNext={() => dispatch({ type: 'next' })} />
+          <Feed
+            round={state.round}
+            phase={phase}
+            ambassador={state.ambassador}
+            onSwipeNext={() => dispatch({ type: 'next' })}
+          />
           <SceneHud state={state} />
 
           {outcome && (phase === 'result' || phase === 'advancing') && (
             <ResultCard key={state.round} outcome={outcome} leaving={phase === 'advancing'} />
           )}
+
+          {toast && <div key={toast} className="toast">{toast}</div>}
 
           <div className="dock">
             <BetPanel
@@ -51,6 +73,8 @@ export default function App() {
               onNext={() => dispatch({ type: 'next' })}
               onStake={stake => dispatch({ type: 'setStake', stake })}
               onOpenStake={() => setSheet('stake')}
+              toggles={toggles}
+              onToggle={(key, value) => setToggles(t => ({ ...t, [key]: value }))}
             />
             <div className="trust"><ShieldIcon /> Virtual coins only</div>
             <div className="history-panel" aria-label="History" />
@@ -65,8 +89,26 @@ export default function App() {
             onApply={stake => { dispatch({ type: 'setStake', stake }); close() }}
           />
         )}
-        {sheet === 'menu' && <Menu onClose={close} onReset={() => dispatch({ type: 'resetBalance' })} />}
+        {sheet === 'menu' && (
+          <Menu
+            balance={state.balance}
+            prefs={prefs}
+            onPref={(key, value) => setPrefs(p => ({ ...p, [key]: value }))}
+            onRules={() => setSheet('rules')}
+            onSoon={soon}
+            onReset={() => dispatch({ type: 'resetBalance' })}
+            onClose={close}
+          />
+        )}
         {sheet === 'rules' && <RulesSheet onClose={close} />}
+        {sheet === 'ambassadors' && (
+          <AmbassadorSheet
+            current={state.ambassador}
+            stake={state.stake}
+            onSelect={id => { dispatch({ type: 'setAmbassador', id }); close() }}
+            onClose={close}
+          />
+        )}
       </main>
     </div>
   )

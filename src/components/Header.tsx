@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { COLOR_LABEL, MULTIPLIERS } from '../game/config'
 import type { Outcome } from '../game/useGame'
-import { GearIcon, HeartIcon, HistoryIcon, InfoIcon, WalletIcon } from './icons'
+import { GearIcon, HeartIcon, HistoryIcon, InfoIcon, LockIcon, WalletIcon } from './icons'
 
 export const formatCoins = (n: number) =>
   n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -30,11 +30,13 @@ interface Props {
   balance: number
   delta: number | null
   history: Outcome[]
+  ambassador: string | null
   onMenu: () => void
   onInfo: () => void
+  onAmbassadors: () => void
 }
 
-export function Header({ balance, delta, history, onMenu, onInfo }: Props) {
+export function Header({ balance, delta, history, ambassador, onMenu, onInfo, onAmbassadors }: Props) {
   const shown = useTweened(balance)
   return (
     <header className="header">
@@ -53,7 +55,15 @@ export function Header({ balance, delta, history, onMenu, onInfo }: Props) {
               <span key={delta} className="balance-delta">+{formatCoins(delta)}</span>
             )}
           </div>
-          <button className="hbtn ambassadors" aria-label="Ambassadors" title="Ambassadors"><HeartIcon size={20} /></button>
+          {ambassador ? (
+            <button className="hbtn ambassadors is-locked" onClick={onAmbassadors} aria-label="Change ambassador" title="Change ambassador">
+              <LockIcon />
+            </button>
+          ) : (
+            <button className="hbtn ambassadors" onClick={onAmbassadors} aria-label="Ambassadors" title="Ambassadors">
+              <HeartIcon size={20} />
+            </button>
+          )}
           <button className="hbtn" onClick={onMenu} aria-label="Settings"><GearIcon /></button>
         </div>
       </div>

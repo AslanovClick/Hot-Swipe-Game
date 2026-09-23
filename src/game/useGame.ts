@@ -1,9 +1,9 @@
 import { useEffect, useReducer, useRef } from 'react'
 import {
-  ADVANCE_MS, BETTING_MS, DEFAULT_STAKE, MULTIPLIERS, RESULT_MS, RESULT_NO_BET_MS, REVEAL_MS, START_BALANCE,
+  ADVANCE_MS, AMBASSADOR_COST_MULT, BETTING_MS, DEFAULT_STAKE, MULTIPLIERS, RESULT_MS, RESULT_NO_BET_MS, REVEAL_MS, START_BALANCE,
   type Color,
 } from './config'
-import { sceneAt } from './scenes'
+import { sceneFor } from './scenes'
 
 export type Phase = 'betting' | 'reveal' | 'result' | 'advancing'
 
@@ -28,6 +28,7 @@ export interface GameState {
   balance: number
   stake: number
   history: Outcome[] // newest first
+  ambassador: string | null // scene id
 }
 
 type Action =
@@ -37,6 +38,7 @@ type Action =
   | { type: 'setStake'; stake: number }
   | { type: 'next' }
   | { type: 'resetBalance' }
+  | { type: 'setAmbassador'; id: string | null }
 
 const HISTORY_LIMIT = 30
 
@@ -51,10 +53,15 @@ export const phaseDuration = (s: GameState) => {
   }
 }
 
+// Amount actually placed for the current stake (higher when playing with an ambassador)
+export const betCost = (s: Pick<GameState, 'stake' | 'ambassador'>) =>
+  round2(s.stake * (s.ambassador ? AMBASSADOR_COST_MULT : 1))
+
 // Closes betting: takes the stake off the balance if a color is picked, otherwise the round is watched without a bet
 function lockIn(s: GameState): GameState {
-  const canBet = s.pick !== null && s.stake > 0 && s.stake <= s.balance
-  const bet = canBet ? { color: s.pick!, stake: s.stake } : null
+  const cost = betCost(s)
+  const canBet = s.pick !== null && cost > 0 && cost <= s.balance
+  const bet = canBet ? { color: s.pick!, stake: cost } : null
   return {
     ...s,
     phase: 'reveal',
@@ -65,7 +72,7 @@ function lockIn(s: GameState): GameState {
 }
 
 function settle(s: GameState): GameState {
-  const result = sceneAt(s.round).result
+  const result = sceneFor(s.ambassador, s.round).result
   const payout = s.bet && s.bet.color === result ? round2(s.bet.stake * MULTIPLIERS[result]) : 0
   return {
     ...s,
@@ -111,7 +118,7 @@ function reducer(s: GameState, a: Action): GameState {
       if (s.phase !== 'betting') return s
       return { ...s, pick: s.pick === a.color ? null : a.color }
     case 'placeBet':
-      if (s.phase !== 'betting' || !s.pick || s.stake > s.balance) return s
+      if (s.phase !== 'betting' || !s.pick || betCost(s) > s.balance) return s
       return lockIn(s)
     case 'setStake':
       return { ...s, stake: Math.max(1, Math.floor(a.stake)) }
@@ -119,6 +126,11 @@ function reducer(s: GameState, a: Action): GameState {
       return s.phase === 'result' ? advance(s) : s
     case 'resetBalance':
       return { ...s, balance: START_BALANCE }
+    case 'setAmbassador':
+      // Switch right away if the round hasn't been played yet; otherwise from the next round
+      return s.phase === 'betting'
+        ? { ...s, ambassador: a.id, elapsed: 0, pick: null }
+        : { ...s, ambassador: a.id }
   }
 }
 
@@ -144,6 +156,7 @@ export function useGame(paused: boolean) {
     balance: loadBalance(),
     stake: DEFAULT_STAKE,
     history: [],
+    ambassador: null,
   }))
 
   const pausedRef = useRef(paused)

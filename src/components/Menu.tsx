@@ -1,35 +1,78 @@
 import type { ReactNode } from 'react'
-import { AutoIcon, BoltIcon, ResetIcon, StatsIcon } from './icons'
+import { formatCoins } from './Header'
+import {
+  BoltIcon, BookIcon, ChevronRightIcon, HelpIcon, HistoryIcon, SlidersIcon, SparkleIcon, SpeakerIcon, StatsIcon, WalletIcon,
+} from './icons'
+import { Toggle } from './Toggle'
 
-export function Menu({ onClose, onReset }: { onClose: () => void; onReset: () => void }) {
+export interface Prefs {
+  audio: boolean
+  animation: boolean
+  quickBet: boolean
+}
+
+interface Props {
+  balance: number
+  prefs: Prefs
+  onPref: (key: keyof Prefs, value: boolean) => void
+  onRules: () => void
+  onSoon: (label: string) => void
+  onReset: () => void
+  onClose: () => void
+}
+
+export function Menu({ balance, prefs, onPref, onRules, onSoon, onReset, onClose }: Props) {
   return (
     <div className="sheet-backdrop" onClick={onClose}>
       <nav className="sheet menu" onClick={e => e.stopPropagation()} aria-label="Menu">
         <div className="sheet-handle" />
-        <div className="sheet-title">Menu</div>
 
-        <div className="glass menu-group">
-          <MenuItem icon={<BoltIcon />} label="High Risk" soon />
-          <MenuItem icon={<AutoIcon />} label="Auto mode" soon />
-          <MenuItem icon={<StatsIcon />} label="Statistics" soon />
+        <div className="menu-balance">
+          <span className="menu-icon"><WalletIcon /></span>
+          <span className="menu-balance-label">Balance</span>
+          <span className="menu-balance-value">{formatCoins(balance)}</span>
+          <button className="menu-reset" onClick={onReset}>Reset</button>
         </div>
 
         <div className="glass menu-group">
-          <MenuItem icon={<ResetIcon />} label="Reset balance" onClick={() => { onReset(); onClose() }} />
+          <LinkItem icon={<StatsIcon />} label="Statistics" onClick={() => onSoon('Statistics')} />
+          <LinkItem icon={<BookIcon />} label="Game rules" onClick={onRules} />
+          <LinkItem icon={<SlidersIcon />} label="Preferences" onClick={() => onSoon('Preferences')} />
         </div>
 
-        <button className="cta menu-close" onClick={onClose}><span className="cta-label">Back to game</span></button>
+        <div className="glass menu-group">
+          <ToggleItem icon={<SpeakerIcon />} label="Audio" checked={prefs.audio} onChange={v => onPref('audio', v)} />
+          <ToggleItem icon={<SparkleIcon />} label="Animation" checked={prefs.animation} onChange={v => onPref('animation', v)} />
+          <ToggleItem icon={<BoltIcon />} label="Quick bet" checked={prefs.quickBet} onChange={v => onPref('quickBet', v)} />
+        </div>
+
+        <div className="glass menu-group">
+          <LinkItem icon={<HistoryIcon />} label="History" onClick={() => onSoon('History')} />
+          <LinkItem icon={<HelpIcon />} label="Help" onClick={onRules} />
+        </div>
+
+        <button className="glass btn-ghost menu-close" onClick={onClose}>Close</button>
       </nav>
     </div>
   )
 }
 
-function MenuItem({ icon, label, soon, onClick }: { icon: ReactNode; label: string; soon?: boolean; onClick?: () => void }) {
+function LinkItem({ icon, label, onClick }: { icon: ReactNode; label: string; onClick: () => void }) {
   return (
-    <button className="menu-item" onClick={onClick} disabled={soon}>
+    <button className="menu-item" onClick={onClick}>
       <span className="menu-icon">{icon}</span>
       <span>{label}</span>
-      {soon && <span className="soon">Soon</span>}
+      <span className="menu-chevron"><ChevronRightIcon /></span>
     </button>
+  )
+}
+
+function ToggleItem({ icon, label, checked, onChange }: { icon: ReactNode; label: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div className="menu-item">
+      <span className="menu-icon">{icon}</span>
+      <span>{label}</span>
+      <span className="menu-toggle"><Toggle checked={checked} onChange={onChange} /></span>
+    </div>
   )
 }

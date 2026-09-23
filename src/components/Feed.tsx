@@ -1,16 +1,17 @@
 import { useRef } from 'react'
-import { sceneAt } from '../game/scenes'
+import { sceneFor } from '../game/scenes'
 import type { Phase } from '../game/useGame'
 import { PinIcon } from './icons'
 
 interface Props {
   round: number
   phase: Phase
+  ambassador: string | null
   onSwipeNext: () => void
 }
 
 // Slides are keyed by absolute round number so the outgoing and incoming slides animate as one strip
-export function Feed({ round, phase, onSwipeNext }: Props) {
+export function Feed({ round, phase, ambassador, onSwipeNext }: Props) {
   const offset = phase === 'advancing' ? 1 : 0
   const startY = useRef<number | null>(null)
 
@@ -27,7 +28,7 @@ export function Feed({ round, phase, onSwipeNext }: Props) {
       onWheel={e => { if (e.deltaY > 30) onSwipeNext() }}
     >
       {slides.map(abs => {
-        const scene = sceneAt(abs)
+        const scene = sceneFor(ambassador, abs)
         const pos = abs - round - offset
         const revealed = abs < round || (abs === round && phase !== 'betting')
         return (
@@ -54,8 +55,8 @@ export function Feed({ round, phase, onSwipeNext }: Props) {
   )
 }
 
-export function ModelInfo({ round, phase }: { round: number; phase: Phase }) {
-  const scene = sceneAt(round)
+export function ModelInfo({ round, phase, ambassador }: { round: number; phase: Phase; ambassador: string | null }) {
+  const scene = sceneFor(ambassador, round)
   return (
     <div key={round} className={`model-info ${phase === 'advancing' ? 'is-leaving' : ''}`}>
       <div className="model-name">{scene.name}, {scene.age}</div>
