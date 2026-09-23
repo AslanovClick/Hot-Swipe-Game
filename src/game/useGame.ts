@@ -27,6 +27,7 @@ export interface GameState {
   outcome: Outcome | null
   balance: number
   stake: number
+  history: Outcome[] // newest first
 }
 
 type Action =
@@ -36,6 +37,8 @@ type Action =
   | { type: 'setStake'; stake: number }
   | { type: 'next' }
   | { type: 'resetBalance' }
+
+const HISTORY_LIMIT = 30
 
 const round2 = (n: number) => Math.round(n * 100) / 100
 
@@ -70,6 +73,7 @@ function settle(s: GameState): GameState {
     elapsed: 0,
     outcome: { result, bet: s.bet, payout },
     balance: round2(s.balance + payout),
+    history: [{ result, bet: s.bet, payout }, ...s.history].slice(0, HISTORY_LIMIT),
   }
 }
 
@@ -139,6 +143,7 @@ export function useGame(paused: boolean) {
     outcome: null,
     balance: loadBalance(),
     stake: DEFAULT_STAKE,
+    history: [],
   }))
 
   const pausedRef = useRef(paused)

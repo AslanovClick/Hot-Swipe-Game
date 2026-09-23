@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { BurgerIcon, CoinIcon, HeartIcon } from './icons'
+import { COLOR_LABEL, MULTIPLIERS } from '../game/config'
+import type { Outcome } from '../game/useGame'
+import { GearIcon, HeartIcon, HistoryIcon, InfoIcon, WalletIcon } from './icons'
 
 export const formatCoins = (n: number) =>
   n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -27,28 +29,61 @@ function useTweened(target: number, ms = 700) {
 interface Props {
   balance: number
   delta: number | null
+  history: Outcome[]
   onMenu: () => void
+  onInfo: () => void
 }
 
-export function Header({ balance, delta, onMenu }: Props) {
+export function Header({ balance, delta, history, onMenu, onInfo }: Props) {
   const shown = useTweened(balance)
   return (
     <header className="header">
-      <button className="glass icon-btn" onClick={onMenu} aria-label="Menu">
-        <BurgerIcon />
-      </button>
+      <div className="header-top">
+        <div className="logo" aria-label="Hot Swipe">
+          <span>Hot</span>
+          <span>Swipe<HeartIcon size={14} /></span>
+        </div>
 
-      <div className="balance glass" aria-label="Balance">
-        <CoinIcon size={22} />
-        <span className="balance-value">{formatCoins(shown)}</span>
-        {delta !== null && delta > 0 && (
-          <span key={delta} className="balance-delta">+{formatCoins(delta)}</span>
-        )}
+        <div className="header-actions">
+          <button className="hbtn" onClick={onInfo} aria-label="How to play"><InfoIcon /></button>
+          <div className="hbtn balance" aria-label="Balance">
+            <WalletIcon />
+            <span className="balance-value">{formatCoins(shown)}</span>
+            {delta !== null && delta > 0 && (
+              <span key={delta} className="balance-delta">+{formatCoins(delta)}</span>
+            )}
+          </div>
+          <button className="hbtn ambassadors" aria-label="Ambassadors" title="Ambassadors"><HeartIcon size={20} /></button>
+          <button className="hbtn" onClick={onMenu} aria-label="Settings"><GearIcon /></button>
+        </div>
       </div>
 
-      <button className="icon-btn ambassadors" aria-label="Ambassadors" title="Ambassadors">
-        <HeartIcon size={20} />
-      </button>
+      <HistoryStrip history={history} />
     </header>
+  )
+}
+
+// Won round: chip filled with the color that was bet on. Lost: outlined in the color that won.
+// No bet: faint outline in the winning color.
+function HistoryStrip({ history }: { history: Outcome[] }) {
+  return (
+    <div className="history">
+      <div className="history-chips">
+        <span className="hchip is-current" aria-label="Current round">?</span>
+        {history.map((o, i) => {
+          const kind = o.payout > 0 ? 'win' : o.bet ? 'lose' : 'skip'
+          return (
+            <span
+              key={history.length - i}
+              className={`hchip is-${kind} c-${o.result}`}
+              title={`${COLOR_LABEL[o.result]} · ${kind === 'win' ? 'won' : kind === 'lose' ? 'lost' : 'no bet'}`}
+            >
+              {MULTIPLIERS[o.result].toFixed(2)}
+            </span>
+          )
+        })}
+      </div>
+      <button className="history-btn" aria-label="Round history"><HistoryIcon /></button>
+    </div>
   )
 }

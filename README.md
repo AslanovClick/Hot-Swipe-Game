@@ -1,4 +1,6 @@
-# Hot Swipe — MVP prototype
+# Hot Swipe — MVP prototype (Version 2)
+
+Version 1 (full-screen feed layout) is kept on the `version-1` branch / `v1.0` tag.
 
 Vertical feed game: each round shows a model, the player picks the sports top color (Black ×1.45 / Red ×2.80 / White ×7.20) and places a bet in virtual coins. After a 4 s timer (or on BET) the scene reveals the actual color and the round is settled, then the feed auto-scrolls to the next model.
 

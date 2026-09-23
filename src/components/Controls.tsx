@@ -5,6 +5,42 @@ import { ModelInfo } from './Feed'
 import { formatCoins } from './Header'
 import { CheckIcon } from './icons'
 
+export const stepStake = (stake: number, dir: 1 | -1, max: number) => {
+  const next = dir > 0
+    ? STAKE_STEPS.find(v => v > stake) ?? stake
+    : [...STAKE_STEPS].reverse().find(v => v < stake) ?? STAKE_STEPS[0]
+  return Math.max(1, Math.min(next, Math.max(1, Math.floor(max))))
+}
+
+// Timer (top center of the scene) and model name (bottom left, above the dock)
+export function SceneHud({ state }: { state: GameState }) {
+  const { phase } = state
+  const betting = phase === 'betting'
+  const remaining = betting ? Math.max(0, BETTING_MS - state.elapsed) : 0
+  const urgent = betting && remaining < 1500
+
+  return (
+    <>
+      <div className={`scene-timer ${phase === 'result' || phase === 'advancing' ? 'is-idle' : ''} ${phase === 'reveal' ? 'is-reveal' : ''}`}>
+        <div className={`timer ${urgent ? 'is-urgent' : ''}`}>
+          {betting ? `0:0${Math.ceil(remaining / 1000)}` : phase === 'reveal'
+            ? <span className="is-status">Revealing<span className="dots"><i>.</i><i>.</i><i>.</i></span></span>
+            : '0:00'}
+        </div>
+        <div className="timebar">
+          <div
+            className={`timebar-fill ${urgent ? 'is-urgent' : ''}`}
+            style={{ transform: `scaleX(${betting ? remaining / BETTING_MS : 0})` }}
+          />
+        </div>
+      </div>
+      <div className="scene-model">
+        <ModelInfo round={state.round} phase={phase} />
+      </div>
+    </>
+  )
+}
+
 interface Props {
   state: GameState
   onPick: (c: Color) => void
@@ -14,52 +50,26 @@ interface Props {
   onOpenStake: () => void
 }
 
-export const stepStake = (stake: number, dir: 1 | -1, max: number) => {
-  const next = dir > 0
-    ? STAKE_STEPS.find(v => v > stake) ?? stake
-    : [...STAKE_STEPS].reverse().find(v => v < stake) ?? STAKE_STEPS[0]
-  return Math.max(1, Math.min(next, Math.max(1, Math.floor(max))))
-}
-
-export function Controls({ state, onPick, onBet, onNext, onStake, onOpenStake }: Props) {
+export function BetPanel({ state, onPick, onBet, onNext, onStake, onOpenStake }: Props) {
   const { phase, pick, outcome, stake, balance, bet } = state
   const betting = phase === 'betting'
-  const remaining = betting ? Math.max(0, BETTING_MS - state.elapsed) : 0
-  const secs = Math.ceil(remaining / 1000)
-  const urgent = betting && remaining < 1500
   const shownResult = phase === 'result' || phase === 'advancing' ? outcome?.result ?? null : null
   const locked = !betting
   const lockedColor = bet?.color ?? null
   const broke = stake > balance
   const ref = useRef<HTMLDivElement>(null)
 
-  // Exposes the panel height so overlays (result text) can sit right above the model name
+  // Exposes the dock height so scene overlays (model name, result text) sit right above it
   useEffect(() => {
-    const el = ref.current
+    const el = ref.current?.closest<HTMLElement>('.dock')
     if (!el) return
-    const ro = new ResizeObserver(() => el.parentElement?.style.setProperty('--controls-h', `${el.offsetHeight}px`))
+    const ro = new ResizeObserver(() => el.parentElement?.style.setProperty('--dock-h', `${el.offsetHeight}px`))
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
 
   return (
-    <div className="controls" ref={ref}>
-      <div className="info-row">
-        <ModelInfo round={state.round} phase={phase} />
-        {betting ? (
-          <div className={`timer ${urgent ? 'is-urgent' : ''}`}>0:0{secs}</div>
-        ) : phase === 'reveal' ? (
-          <div className="timer is-status">Revealing<span className="dots"><i>.</i><i>.</i><i>.</i></span></div>
-        ) : null}
-      </div>
-
-      <div className="timebar">
-        <div
-          className={`timebar-fill ${urgent ? 'is-urgent' : ''}`}
-          style={{ transform: `scaleX(${betting ? remaining / BETTING_MS : 0})` }}
-        />
-      </div>
-
+    <div className="panel" ref={ref}>
       <div className="colors" role="radiogroup" aria-label="Pick a color">
         {COLORS.map(c => {
           const selected = betting ? pick === c : lockedColor === c
@@ -80,55 +90,70 @@ export function Controls({ state, onPick, onBet, onNext, onStake, onOpenStake }:
               onClick={() => onPick(c)}
               disabled={locked}
             >
-              <span className="mult glass">×{MULTIPLIERS[c].toFixed(2)}</span>
-              <span className="color-face">
-                {COLOR_LABEL[c]}
-                {selected && <span className="check"><CheckIcon /></span>}
-              </span>
+              <span className="color-name">{COLOR_LABEL[c]}</span>
+              <span className="color-mult">×{MULTIPLIERS[c].toFixed(2)}</span>
+              {selected && <span className="check"><CheckIcon /></span>}
             </button>
           )
         })}
       </div>
 
-      <div className="bet-row">
-        <div className="stake glass">
-          <button
-            className="stake-step"
-            onClick={() => onStake(stepStake(stake, -1, balance))}
-            disabled={locked}
-            aria-label="Decrease bet"
-          >−</button>
-          <button className="stake-value" onClick={onOpenStake} aria-label="Change bet size">
-            {formatCoins(stake)}
-          </button>
-          <button
-            className="stake-step"
-            onClick={() => onStake(stepStake(stake, 1, balance))}
-            disabled={locked}
-            aria-label="Increase bet"
-          >+</button>
+      <div className="panel-row">
+        <div className="block toggles">
+          <Toggle label="Auto bet" />
+          <Toggle label="High risk" />
         </div>
 
-        {phase === 'result' ? (
-          <button className={`cta cta-next ${outcome && outcome.payout === 0 ? 'is-light' : ''}`} onClick={onNext}>
-            <span
-              className="cta-progress"
-              style={{ transform: `scaleX(${Math.min(1, state.elapsed / phaseDuration(state))})` }}
-            />
-            <span className="cta-label">Play Next</span>
-          </button>
-        ) : (
-          <button
-            className="cta"
-            onClick={onBet}
-            disabled={!betting || !pick || broke}
-          >
-            <span className="cta-label">
-              {!betting ? (bet ? 'Bet placed' : 'No bet') : broke ? 'Low balance' : pick ? 'Bet' : 'Pick a color'}
-            </span>
-          </button>
-        )}
+        <div className="block bet-block">
+          <div className="stepper">
+            <button
+              className="stake-step"
+              onClick={() => onStake(stepStake(stake, -1, balance))}
+              disabled={locked}
+              aria-label="Decrease bet"
+            >−</button>
+            <button className="stake-value" onClick={onOpenStake} aria-label="Change bet size">
+              {formatCoins(stake)}
+            </button>
+            <button
+              className="stake-step"
+              onClick={() => onStake(stepStake(stake, 1, balance))}
+              disabled={locked}
+              aria-label="Increase bet"
+            >+</button>
+          </div>
+
+          {phase === 'result' ? (
+            <button className={`cta cta-next ${outcome && outcome.payout === 0 ? 'is-light' : ''}`} onClick={onNext}>
+              <span
+                className="cta-progress"
+                style={{ transform: `scaleX(${Math.min(1, state.elapsed / phaseDuration(state))})` }}
+              />
+              <span className="cta-label">Play next</span>
+            </button>
+          ) : (
+            <button className="cta" onClick={onBet} disabled={!betting || !pick || broke}>
+              <span className="cta-label">
+                {!betting
+                  ? (bet ? 'Bet placed' : 'No bet')
+                  : broke ? 'Low balance' : pick ? 'Bet' : 'Pick a color'}
+              </span>
+              {betting && pick && !broke && <span className="cta-sub">{formatCoins(stake)} coins</span>}
+            </button>
+          )}
+        </div>
       </div>
     </div>
+  )
+}
+
+// Placeholder switches for upcoming Auto / High risk modes
+function Toggle({ label }: { label: string }) {
+  return (
+    <label className="toggle" title="Coming soon">
+      <input type="checkbox" disabled />
+      <span className="toggle-track"><span className="toggle-knob" /></span>
+      <span className="toggle-label">{label}</span>
+    </label>
   )
 }

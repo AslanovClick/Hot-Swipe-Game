@@ -67,3 +67,37 @@ export const ResetIcon = () => (
     <path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5" stroke="currentColor" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 )
+
+export const InfoIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden>
+    <circle cx="12" cy="12" r="10" fill="currentColor" />
+    <path d="M12 10.5v6.5M12 7v.01" stroke="#1a1226" strokeWidth="2.6" strokeLinecap="round" />
+  </svg>
+)
+
+export const WalletIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden>
+    <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H18v3H6.5a.5.5 0 0 0 0 1H20v11a1 1 0 0 1-1 1H6.5A2.5 2.5 0 0 1 4 17.5v-11z" fill="currentColor" />
+    <circle cx="16.5" cy="14" r="1.4" fill="#1a1226" />
+  </svg>
+)
+
+export const GearIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden>
+    <path fillRule="evenodd" fill="currentColor"
+      d="M10.3 2h3.4l.5 2.6 1.6.7 2.2-1.5 2.4 2.4-1.5 2.2.7 1.6 2.6.5v3.4l-2.6.5-.7 1.6 1.5 2.2-2.4 2.4-2.2-1.5-1.6.7-.5 2.6h-3.4l-.5-2.6-1.6-.7-2.2 1.5-2.4-2.4 1.5-2.2-.7-1.6L2 13.7v-3.4l2.6-.5.7-1.6-1.5-2.2 2.4-2.4 2.2 1.5 1.6-.7.5-2.6zM12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
+  </svg>
+)
+
+export const HistoryIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden>
+    <path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4 4.5V8h3.5M12 8v4.5l3 2" stroke="currentColor" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+)
+
+export const ShieldIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
+    <path d="M12 2l8 3v6.5c0 5-3.4 8.7-8 10.5-4.6-1.8-8-5.5-8-10.5V5l8-3z" fill="currentColor" />
+    <path d="M8.5 12l2.5 2.5 4.5-5" stroke="#1a1226" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+)
