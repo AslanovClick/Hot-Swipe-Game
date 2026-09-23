@@ -5,3 +5,6 @@ dist
 
 # Original full-size scene sources; the app uses the compressed copies in public/scenes
 /*.png
+
+# Original full-size onboarding sources
+/assets-src

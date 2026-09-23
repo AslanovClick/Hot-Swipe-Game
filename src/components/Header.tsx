@@ -34,9 +34,10 @@ interface Props {
   onMenu: () => void
   onInfo: () => void
   onAmbassadors: () => void
+  onHistory: () => void
 }
 
-export function Header({ balance, delta, history, ambassador, onMenu, onInfo, onAmbassadors }: Props) {
+export function Header({ balance, delta, history, ambassador, onMenu, onInfo, onAmbassadors, onHistory }: Props) {
   const shown = useTweened(balance)
   return (
     <header className="header">
@@ -68,14 +69,14 @@ export function Header({ balance, delta, history, ambassador, onMenu, onInfo, on
         </div>
       </div>
 
-      <HistoryStrip history={history} />
+      <HistoryStrip history={history} onOpen={onHistory} />
     </header>
   )
 }
 
 // Won round: chip filled with the color that was bet on. Lost: outlined in the color that won.
 // No bet: faint outline in the winning color.
-function HistoryStrip({ history }: { history: Outcome[] }) {
+function HistoryStrip({ history, onOpen }: { history: Outcome[]; onOpen: () => void }) {
   return (
     <div className="history">
       <div className="history-chips">
@@ -93,7 +94,7 @@ function HistoryStrip({ history }: { history: Outcome[] }) {
           )
         })}
       </div>
-      <button className="history-btn" aria-label="Round history"><HistoryIcon /></button>
+      <button className="history-btn" onClick={onOpen} aria-label="Round history"><HistoryIcon /></button>
     </div>
   )
 }

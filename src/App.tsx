@@ -4,18 +4,34 @@ import { BetSheet } from './components/BetSheet'
 import { BetPanel, SceneHud } from './components/Controls'
 import { Feed } from './components/Feed'
 import { Header } from './components/Header'
+import { HistorySheet } from './components/HistorySheet'
 import { ShieldIcon } from './components/icons'
 import { Menu, type Prefs } from './components/Menu'
+import { Onboarding, type Preferences } from './components/Onboarding'
 import { ResultCard } from './components/ResultCard'
 import { RulesSheet } from './components/RulesSheet'
 import { SCENES } from './game/scenes'
 import { useGame } from './game/useGame'
 
-type Sheet = 'menu' | 'stake' | 'rules' | 'ambassadors' | null
+type Sheet = 'menu' | 'stake' | 'rules' | 'ambassadors' | 'history' | null
+
+const ONBOARDING_KEY = 'hotswipe.preferences'
+
+function loadPreferences(): Preferences | null {
+  try {
+    const raw = localStorage.getItem(ONBOARDING_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
 
 export default function App() {
   const [sheet, setSheet] = useState<Sheet>(null)
-  const { state, dispatch } = useGame(sheet !== null)
+  // Onboarding shows before the game until the player finishes or skips it once
+  const [preferences, setPreferences] = useState<Preferences | null>(loadPreferences)
+  const [onboarding, setOnboarding] = useState(preferences === null)
+  const { state, dispatch } = useGame(sheet !== null || onboarding)
   const { phase, outcome } = state
   const close = () => setSheet(null)
 
@@ -29,6 +45,12 @@ export default function App() {
     setToast(`${label} — coming soon`)
     clearTimeout(toastTimer.current)
     toastTimer.current = window.setTimeout(() => setToast(null), 1800)
+  }
+
+  const finishOnboarding = (p: Preferences) => {
+    setPreferences(p)
+    setOnboarding(false)
+    try { localStorage.setItem(ONBOARDING_KEY, JSON.stringify(p)) } catch { /* storage unavailable */ }
   }
 
   useEffect(() => {
@@ -48,6 +70,7 @@ export default function App() {
           onMenu={() => setSheet('menu')}
           onInfo={() => setSheet('rules')}
           onAmbassadors={() => setSheet('ambassadors')}
+          onHistory={() => setSheet('history')}
         />
 
         <section className="stage">
@@ -77,7 +100,6 @@ export default function App() {
               onToggle={(key, value) => setToggles(t => ({ ...t, [key]: value }))}
             />
             <div className="trust"><ShieldIcon /> Virtual coins only</div>
-            <div className="history-panel" aria-label="History" />
           </div>
         </section>
 
@@ -95,12 +117,18 @@ export default function App() {
             prefs={prefs}
             onPref={(key, value) => setPrefs(p => ({ ...p, [key]: value }))}
             onRules={() => setSheet('rules')}
+            onHistory={() => setSheet('history')}
+            onPreferences={() => { close(); setOnboarding(true) }}
             onSoon={soon}
             onReset={() => dispatch({ type: 'resetBalance' })}
             onClose={close}
           />
         )}
         {sheet === 'rules' && <RulesSheet onClose={close} />}
+        {sheet === 'history' && <HistorySheet history={state.history} onClose={close} />}
+        {onboarding && (
+          <Onboarding initial={preferences ?? { hair: [], body: [], ethnicity: [] }} onDone={finishOnboarding} />
+        )}
         {sheet === 'ambassadors' && (
           <AmbassadorSheet
             current={state.ambassador}

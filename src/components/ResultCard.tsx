@@ -1,7 +1,7 @@
 import { COLOR_LABEL, MULTIPLIERS } from '../game/config'
 import type { Outcome } from '../game/useGame'
 import { formatCoins } from './Header'
-import { CoinIcon, HeartIcon } from './icons'
+import { CoinIcon, HeartSolid } from './icons'
 
 export function ResultCard({ outcome, leaving }: { outcome: Outcome; leaving: boolean }) {
   const { bet, result, payout } = outcome
@@ -86,7 +86,7 @@ function FloatingHearts() {
               ['--sway' as string]: `${h.sway}px`,
             }}
           >
-            <HeartIcon size={Math.round(h.size)} />
+            <HeartSolid size={Math.round(h.size)} />
           </span>
         </span>
       ))}
