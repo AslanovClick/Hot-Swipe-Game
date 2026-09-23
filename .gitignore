@@ -1,0 +1,7 @@
+node_modules
+dist
+*.tsbuildinfo
+.claude
+
+# Original full-size scene sources; the app uses the compressed copies in public/scenes
+/*.png
