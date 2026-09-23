@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { BodyIcon, BODY_SHAPES, CheckIcon, HeartIcon } from './icons'
+import { CheckIcon, HeartIcon } from './icons'
 
 // One pick per category; collected for later personalization, doesn't affect the feed yet
 export interface Preferences {
@@ -14,9 +14,17 @@ interface Option { id: string; label: string; visual: ReactNode }
 
 const img = (src: string) => <img src={src} alt="" draggable={false} />
 
-const BODY_LABELS: Record<keyof typeof BODY_SHAPES, string> = {
-  slim: 'Slim', athletic: 'Athletic', curvy: 'Curvy', unique: 'Unique',
-}
+// Body-type artwork is a single-color SVG used as a mask, so it follows currentColor
+const bodyArt = (id: string) => (
+  <span className="onb-body-art" style={{ maskImage: `url(/onboarding/body-${id}.svg)`, WebkitMaskImage: `url(/onboarding/body-${id}.svg)` }} />
+)
+
+const BODY_TYPES = [
+  { id: 'slim', label: 'Slim' },
+  { id: 'athletic', label: 'Athletic' },
+  { id: 'curvy', label: 'Curvy' },
+  { id: 'unique', label: 'Unique' },
+]
 
 const CATEGORIES: { key: keyof Preferences; title: string; options: Option[] }[] = [
   {
@@ -31,9 +39,7 @@ const CATEGORIES: { key: keyof Preferences; title: string; options: Option[] }[]
   {
     key: 'body',
     title: 'Body type',
-    options: (Object.keys(BODY_SHAPES) as (keyof typeof BODY_SHAPES)[]).map(id => ({
-      id, label: BODY_LABELS[id], visual: <BodyIcon shape={id} size={40} />,
-    })),
+    options: BODY_TYPES.map(b => ({ ...b, visual: bodyArt(b.id) })),
   },
   {
     key: 'ethnicity',

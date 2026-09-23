@@ -1196,6 +1196,17 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 }
 .onb-visual img { width: 100%; height: 100%; object-fit: cover; }
 .onb-card.is-on .onb-visual { color: var(--pink); }
+.onb-body-art {
+  width: 86%;
+  height: 86%;
+  background-color: currentColor;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+}
 
 .onb-label { margin-top: 6px; font-size: 12px; font-weight: 600; }
 
