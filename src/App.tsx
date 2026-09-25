@@ -10,7 +10,7 @@ import { Menu, type Prefs } from './components/Menu'
 import { EMPTY_PREFERENCES, Onboarding, type Preferences } from './components/Onboarding'
 import { ResultCard } from './components/ResultCard'
 import { RulesSheet } from './components/RulesSheet'
-import { SCENES } from './game/scenes'
+import { BACKGROUNDS, MODELS } from './game/scenes'
 import { useGame } from './game/useGame'
 
 type Sheet = 'menu' | 'stake' | 'rules' | 'ambassadors' | 'history' | null
@@ -54,7 +54,8 @@ export default function App() {
   }
 
   useEffect(() => {
-    for (const s of SCENES) { new Image().src = s.before; new Image().src = s.after }
+    const urls = [...BACKGROUNDS, ...MODELS.flatMap(m => [m.clothe, ...Object.values(m.states)])]
+    for (const src of urls) new Image().src = src
   }, [])
 
   const delta = phase === 'result' || phase === 'advancing' ? outcome?.payout ?? null : null

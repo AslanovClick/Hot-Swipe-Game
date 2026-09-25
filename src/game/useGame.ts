@@ -3,7 +3,7 @@ import {
   ADVANCE_MS, AMBASSADOR_COST_MULT, BETTING_MS, DEFAULT_STAKE, MULTIPLIERS, RESULT_MS, RESULT_NO_BET_MS, REVEAL_MS, START_BALANCE,
   type Color,
 } from './config'
-import { sceneFor } from './scenes'
+import { roundInfo } from './scenes'
 
 export type Phase = 'betting' | 'reveal' | 'result' | 'advancing'
 
@@ -72,7 +72,7 @@ function lockIn(s: GameState): GameState {
 }
 
 function settle(s: GameState): GameState {
-  const result = sceneFor(s.ambassador, s.round).result
+  const result = roundInfo(s.round, s.ambassador).result
   const payout = s.bet && s.bet.color === result ? round2(s.bet.stake * MULTIPLIERS[result]) : 0
   return {
     ...s,

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { AMBASSADOR_COST_MULT } from '../game/config'
-import { SCENES, type Scene } from '../game/scenes'
+import { MODELS, type Model } from '../game/scenes'
 import { formatCoins } from './Header'
 import { CloseIcon, HeartIcon, PinIcon } from './icons'
 
@@ -12,7 +12,7 @@ interface Props {
 }
 
 export function AmbassadorSheet({ current, stake, onSelect, onClose }: Props) {
-  const [confirm, setConfirm] = useState<Scene | null>(null)
+  const [confirm, setConfirm] = useState<Model | null>(null)
 
   return (
     <div className="sheet-backdrop" onClick={onClose}>
@@ -41,11 +41,11 @@ export function AmbassadorSheet({ current, stake, onSelect, onClose }: Props) {
           <div className="amb-sub">Pick your favorite model and play with her</div>
 
           <div className="amb-list">
-            {SCENES.map(s => {
+            {MODELS.map(s => {
               const active = s.id === current
               return (
                 <div key={s.id} className={`amb-card ${active ? 'is-active' : ''}`}>
-                  <img className="amb-photo" src={s.before} alt="" />
+                  <span className="amb-photo"><img src={s.clothe} alt="" /></span>
                   <div className="amb-info">
                     <div className="amb-name">{s.name}, {s.age}</div>
                     <div className="amb-role"><HeartIcon size={11} /> Official ambassador</div>

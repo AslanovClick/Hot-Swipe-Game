@@ -8,6 +8,14 @@ export const MULTIPLIERS: Record<Color, number> = {
   white: 7.2,
 }
 
+// Relative odds of each revealed color. Inverse to the multipliers, so every color has the same
+// expected return (~84%); tweak freely.
+export const RESULT_WEIGHTS: Record<Color, number> = {
+  black: 1 / 1.45,
+  red: 1 / 2.8,
+  white: 1 / 7.2,
+}
+
 export const COLOR_LABEL: Record<Color, string> = {
   black: 'Black',
   red: 'Red',
