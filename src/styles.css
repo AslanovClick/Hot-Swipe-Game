@@ -104,7 +104,7 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   position: absolute;
   left: 50%;
   bottom: calc(var(--dock-h, 300px) * 0.42);
-  height: calc(100% - var(--dock-h, 300px) * 0.42 - 34px);
+  height: calc((100% - var(--dock-h, 300px) * 0.42 - 34px) * 0.9);
   width: auto;
   max-width: none;
   translate: -50% 0;
