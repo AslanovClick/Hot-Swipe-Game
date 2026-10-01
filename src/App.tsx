@@ -70,7 +70,7 @@ export default function App() {
           onHistory={() => setSheet('history')}
         />
 
-        <section className="stage">
+        <section className={`stage ${phase === 'reveal' ? 'is-revealing' : ''}`}>
           <Feed
             round={state.round}
             phase={phase}
@@ -87,7 +87,7 @@ export default function App() {
 
           {toast && <div key={toast} className="toast">{toast}</div>}
 
-          <div className="dock">
+          <div className={`dock ${phase === 'reveal' ? 'is-compact' : ''}`}>
             <BetPanel
               state={state}
               onPick={color => dispatch({ type: 'pick', color })}

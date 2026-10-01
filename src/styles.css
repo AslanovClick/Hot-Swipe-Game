@@ -120,7 +120,10 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .scrim-bottom {
   position: absolute; inset: auto 0 0 0; height: 70%;
   background: linear-gradient(to top, rgba(14, 9, 22, 0.95) 25%, rgba(14, 9, 22, 0.55) 60%, transparent);
+  transition: opacity 450ms ease;
 }
+/* During the reveal the whole clip should read, so the bottom shade mostly lifts */
+.stage.is-revealing .scrim-bottom { opacity: 0.2; }
 
 /* ---------- Header (V2: solid two-row bar) ---------- */
 
@@ -427,6 +430,7 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .color-btn {
   position: relative;
   height: 54px;
+  transition-property: transform, opacity, filter, box-shadow, height;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -467,7 +471,13 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .color-btn.is-win .check { background: var(--win); }
 @keyframes pulse { 50% { transform: scale(1.04); } }
 
-.panel-row { display: grid; grid-template-columns: 1fr 1.35fr; gap: 8px; }
+.panel-row {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 8px;
+  max-height: 160px;
+  transition: max-height 420ms var(--ease), opacity 250ms ease, margin 420ms var(--ease);
+}
 .block { border-radius: 14px; background: var(--block); }
 
 .toggles {
@@ -584,6 +594,9 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   align-items: center;
   gap: 6px;
   margin: 10px 6px 8px;
+  max-height: 24px;
+  overflow: hidden;
+  transition: max-height 420ms var(--ease), opacity 250ms ease, margin 420ms var(--ease);
   font-size: 13px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
@@ -592,6 +605,18 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .trust svg { color: var(--pink); }
 
 .dock { padding-bottom: calc(env(safe-area-inset-bottom) + 2px); }
+
+/* Reveal: the dock folds down to a slim row of color chips so the clip is visible end to end;
+   the full panel returns with the result */
+.panel { transition: padding 420ms var(--ease), border-radius 420ms var(--ease); }
+.dock.is-compact .panel { padding: 6px; border-radius: 14px; }
+.dock.is-compact .panel-row { max-height: 0; margin-top: -8px; opacity: 0; overflow: hidden; pointer-events: none; }
+.dock.is-compact .trust { max-height: 0; margin-top: 4px; margin-bottom: 4px; opacity: 0; }
+.dock.is-compact .colors { gap: 6px; }
+.dock.is-compact .color-btn { height: 34px; flex-direction: row; gap: 6px; border-radius: 10px; }
+.dock.is-compact .color-name { font-size: 13px; }
+.dock.is-compact .color-mult { font-size: 11px; }
+.dock.is-compact .check { top: -6px; right: -5px; width: 16px; height: 16px; }
 
 /* Rules sheet */
 .sheet.rules { display: flex; flex-direction: column; text-align: left; }
