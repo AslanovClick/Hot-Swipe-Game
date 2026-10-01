@@ -1,6 +1,6 @@
 import { useEffect, useReducer, useRef } from 'react'
 import {
-  ADVANCE_MS, AMBASSADOR_COST_MULT, BETTING_MS, DEFAULT_STAKE, MULTIPLIERS, RESULT_MS, RESULT_NO_BET_MS, REVEAL_MS, START_BALANCE,
+  ADVANCE_MS, AMBASSADOR_COST_MULT, BETTING_MS, DEFAULT_STAKE, MULTIPLIERS, RESULT_MS, RESULT_NO_BET_MS, REVEAL_MAX_MS, START_BALANCE,
   type Color,
 } from './config'
 import { roundInfo } from './scenes'
@@ -39,6 +39,7 @@ type Action =
   | { type: 'next' }
   | { type: 'resetBalance' }
   | { type: 'setAmbassador'; id: string | null }
+  | { type: 'revealEnded' }
 
 const HISTORY_LIMIT = 30
 
@@ -47,7 +48,7 @@ const round2 = (n: number) => Math.round(n * 100) / 100
 export const phaseDuration = (s: GameState) => {
   switch (s.phase) {
     case 'betting': return BETTING_MS
-    case 'reveal': return REVEAL_MS
+    case 'reveal': return REVEAL_MAX_MS
     case 'result': return s.outcome?.bet ? RESULT_MS : RESULT_NO_BET_MS
     case 'advancing': return ADVANCE_MS
   }
@@ -124,6 +125,8 @@ function reducer(s: GameState, a: Action): GameState {
       return { ...s, stake: Math.max(1, Math.floor(a.stake)) }
     case 'next':
       return s.phase === 'result' ? advance(s) : s
+    case 'revealEnded':
+      return s.phase === 'reveal' ? settle(s) : s
     case 'resetBalance':
       return { ...s, balance: START_BALANCE }
     case 'setAmbassador':

@@ -24,7 +24,9 @@ export const COLOR_LABEL: Record<Color, string> = {
 
 // Phase durations, ms
 export const BETTING_MS = 4000
-export const REVEAL_MS = 2600
+// The reveal lasts as long as the reveal video (up to ~8 s); this is only a fallback
+// if the video stalls or fails to load
+export const REVEAL_MAX_MS = 10000
 export const RESULT_MS = 3200
 export const RESULT_NO_BET_MS = 2200
 export const ADVANCE_MS = 600

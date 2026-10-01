@@ -1,34 +1,38 @@
 import { COLORS, RESULT_WEIGHTS, type Color } from './config'
 
-// A model is a set of transparent PNG states: `clothe` is shown while betting,
-// one of the colored states is revealed as the round result.
+// Each model has an idle loop (shown while betting) and one reveal video per color;
+// the reveal for the drawn result plays, and the round settles when it ends.
 export interface Model {
   id: string
   name: string
   age: number
   city: string
-  clothe: string
-  states: Record<Color, string>
+  idle: string
+  reveal: Record<Color, string>
+  // Still frame for cards (media fragment: first second of the idle loop)
+  poster: string
 }
 
-const model = (n: number, name: string, age: number, city: string): Model => ({
-  id: String(n),
-  name,
-  age,
-  city,
-  clothe: `/girls/g${n}-clothe.webp`,
-  states: { black: `/girls/g${n}-black.webp`, red: `/girls/g${n}-red.webp`, white: `/girls/g${n}-white.webp` },
-})
+const model = (n: number, name: string, age: number, city: string): Model => {
+  const dir = `/models/model-${n}`
+  return {
+    id: String(n),
+    name,
+    age,
+    city,
+    idle: `${dir}/idle.mp4`,
+    reveal: { black: `${dir}/black.mp4`, red: `${dir}/red.mp4`, white: `${dir}/white.mp4` },
+    poster: `${dir}/idle.mp4#t=1`,
+  }
+}
 
 export const MODELS: Model[] = [
-  model(1, 'Chloe', 24, 'Miami, USA'),
-  model(2, 'Bella', 23, 'Las Vegas, USA'),
-  model(3, 'Ava', 25, 'Los Angeles, USA'),
+  model(4, 'Sofia', 23, 'Miami, USA'),
+  model(5, 'Bella', 24, 'Los Angeles, USA'),
+  model(6, 'Ruby', 22, 'New York, USA'),
 ]
 
-export const BACKGROUNDS = [1, 2, 3, 4, 5, 6].map(n => `/backgrounds/bg-${n}.webp`)
-
-// Everything random about a round (background, result) is derived from a per-session seed and the
+// Everything random about a round (model, result) is derived from a per-session seed and the
 // round number, so neighbouring slides in the feed render consistently and a round never re-rolls.
 const SESSION_SEED = (Math.random() * 2 ** 31) | 0
 
@@ -45,8 +49,8 @@ const hash = (...parts: number[]) => {
 
 const mod = (n: number, m: number) => ((n % m) + m) % m
 
-function shuffledBag(block: number): number[] {
-  const bag = BACKGROUNDS.map((_, i) => i)
+function shuffledBag(size: number, block: number): number[] {
+  const bag = Array.from({ length: size }, (_, i) => i)
   for (let i = bag.length - 1; i > 0; i--) {
     const j = Math.floor(hash(block, 1, i) * (i + 1))
     ;[bag[i], bag[j]] = [bag[j], bag[i]]
@@ -54,13 +58,15 @@ function shuffledBag(block: number): number[] {
   return bag
 }
 
-// Backgrounds come from a shuffled bag per block of rounds, so none repeats back-to-back.
+// Models come from a shuffled bag per block of rounds, so the same one never shows twice in a row.
 // The boundary fix only swaps the first two slots, so a block's last slot never changes.
-function backgroundBag(block: number): number[] {
-  const bag = shuffledBag(block)
-  const prev = shuffledBag(block - 1)
-  if (bag[0] === prev[prev.length - 1]) [bag[0], bag[1]] = [bag[1], bag[0]]
-  return bag
+function modelIndex(round: number): number {
+  const n = MODELS.length
+  const block = Math.floor(round / n)
+  const bag = shuffledBag(n, block)
+  const prev = shuffledBag(n, block - 1)
+  if (n > 1 && bag[0] === prev[n - 1]) [bag[0], bag[1]] = [bag[1], bag[0]]
+  return bag[mod(round, n)]
 }
 
 function pickResult(round: number): Color {
@@ -75,16 +81,12 @@ function pickResult(round: number): Color {
 
 export interface Round {
   model: Model
-  background: string
   result: Color
 }
 
 export function roundInfo(round: number, ambassador: string | null): Round {
-  const n = BACKGROUNDS.length
-  const block = Math.floor(round / n)
   return {
-    model: (ambassador && MODELS.find(m => m.id === ambassador)) || MODELS[mod(round, MODELS.length)],
-    background: BACKGROUNDS[backgroundBag(block)[mod(round, n)]],
+    model: (ambassador && MODELS.find(m => m.id === ambassador)) || MODELS[modelIndex(round)],
     result: pickResult(round),
   }
 }

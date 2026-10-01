@@ -45,7 +45,7 @@ export function AmbassadorSheet({ current, stake, onSelect, onClose }: Props) {
               const active = s.id === current
               return (
                 <div key={s.id} className={`amb-card ${active ? 'is-active' : ''}`}>
-                  <span className="amb-photo"><img src={s.clothe} alt="" /></span>
+                  <span className="amb-photo"><video src={s.poster} muted playsInline preload="metadata" /></span>
                   <div className="amb-info">
                     <div className="amb-name">{s.name}, {s.age}</div>
                     <div className="amb-role"><HeartIcon size={11} /> Official ambassador</div>

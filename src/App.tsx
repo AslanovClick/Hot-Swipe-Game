@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { AmbassadorSheet } from './components/AmbassadorSheet'
 import { BetSheet } from './components/BetSheet'
 import { BetPanel, SceneHud } from './components/Controls'
@@ -10,7 +10,6 @@ import { Menu, type Prefs } from './components/Menu'
 import { EMPTY_PREFERENCES, Onboarding, type Preferences } from './components/Onboarding'
 import { ResultCard } from './components/ResultCard'
 import { RulesSheet } from './components/RulesSheet'
-import { BACKGROUNDS, MODELS } from './game/scenes'
 import { useGame } from './game/useGame'
 
 type Sheet = 'menu' | 'stake' | 'rules' | 'ambassadors' | 'history' | null
@@ -31,7 +30,8 @@ export default function App() {
   // Onboarding shows before the game until the player finishes or skips it once
   const [preferences, setPreferences] = useState<Preferences | null>(loadPreferences)
   const [onboarding, setOnboarding] = useState(preferences === null)
-  const { state, dispatch } = useGame(sheet !== null || onboarding)
+  const paused = sheet !== null || onboarding
+  const { state, dispatch } = useGame(paused)
   const { phase, outcome } = state
   const close = () => setSheet(null)
 
@@ -53,10 +53,6 @@ export default function App() {
     try { localStorage.setItem(ONBOARDING_KEY, JSON.stringify(p)) } catch { /* storage unavailable */ }
   }
 
-  useEffect(() => {
-    const urls = [...BACKGROUNDS, ...MODELS.flatMap(m => [m.clothe, ...Object.values(m.states)])]
-    for (const src of urls) new Image().src = src
-  }, [])
 
   const delta = phase === 'result' || phase === 'advancing' ? outcome?.payout ?? null : null
 
@@ -79,7 +75,9 @@ export default function App() {
             round={state.round}
             phase={phase}
             ambassador={state.ambassador}
+            paused={paused}
             onSwipeNext={() => dispatch({ type: 'next' })}
+            onRevealEnd={() => dispatch({ type: 'revealEnded' })}
           />
           <SceneHud state={state} />
 
