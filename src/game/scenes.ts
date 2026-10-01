@@ -84,9 +84,24 @@ export interface Round {
   result: Color
 }
 
+// Dev only: `?force=6-white` (or `?force=6`, `?force=white`) pins the model and/or result of
+// every round, so each clip can be checked without waiting for the RNG
+function devForce(): { model?: Model; result?: Color } {
+  if (!import.meta.env.DEV) return {}
+  const raw = new URLSearchParams(location.search).get('force')
+  if (!raw) return {}
+  const parts = raw.toLowerCase().split('-')
+  return {
+    model: MODELS.find(m => parts.includes(m.id)),
+    result: COLORS.find(c => parts.includes(c)),
+  }
+}
+
+const FORCE = devForce()
+
 export function roundInfo(round: number, ambassador: string | null): Round {
   return {
-    model: (ambassador && MODELS.find(m => m.id === ambassador)) || MODELS[modelIndex(round)],
-    result: pickResult(round),
+    model: FORCE.model || (ambassador && MODELS.find(m => m.id === ambassador)) || MODELS[modelIndex(round)],
+    result: FORCE.result || pickResult(round),
   }
 }
