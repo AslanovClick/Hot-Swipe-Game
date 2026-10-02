@@ -51,12 +51,11 @@ interface Props {
   onBet: () => void
   onNext: () => void
   onStake: (stake: number) => void
-  onOpenStake: () => void
   toggles: { autoBet: boolean; highRisk: boolean }
   onToggle: (key: 'autoBet' | 'highRisk', value: boolean) => void
 }
 
-export function BetPanel({ state, onPick, onBet, onNext, onStake, onOpenStake, toggles, onToggle }: Props) {
+export function BetPanel({ state, onPick, onBet, onNext, onStake, toggles, onToggle }: Props) {
   const { phase, pick, outcome, stake, balance, bet } = state
   const betting = phase === 'betting'
   const shownResult = phase === 'result' || phase === 'advancing' ? outcome?.result ?? null : null
@@ -119,9 +118,7 @@ export function BetPanel({ state, onPick, onBet, onNext, onStake, onOpenStake, t
               disabled={locked}
               aria-label="Decrease bet"
             >−</button>
-            <button className="stake-value" onClick={onOpenStake} aria-label="Change bet size">
-              {formatCoins(stake)}
-            </button>
+            <span key={stake} className="stake-value" aria-live="polite">{formatCoins(stake)}</span>
             <button
               className="stake-step"
               onClick={() => onStake(stepStake(stake, 1, balance))}

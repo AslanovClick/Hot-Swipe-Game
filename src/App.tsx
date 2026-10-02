@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react'
 import { AmbassadorSheet } from './components/AmbassadorSheet'
-import { BetSheet } from './components/BetSheet'
 import { BetPanel, SceneHud } from './components/Controls'
 import { Feed } from './components/Feed'
 import { Header } from './components/Header'
@@ -12,7 +11,7 @@ import { ResultCard } from './components/ResultCard'
 import { RulesSheet } from './components/RulesSheet'
 import { useGame } from './game/useGame'
 
-type Sheet = 'menu' | 'stake' | 'rules' | 'ambassadors' | 'history' | null
+type Sheet = 'menu' | 'rules' | 'ambassadors' | 'history' | null
 
 const ONBOARDING_KEY = 'hotswipe.preferences.v2'
 
@@ -94,7 +93,6 @@ export default function App() {
               onBet={() => dispatch({ type: 'placeBet' })}
               onNext={() => dispatch({ type: 'next' })}
               onStake={stake => dispatch({ type: 'setStake', stake })}
-              onOpenStake={() => setSheet('stake')}
               toggles={toggles}
               onToggle={(key, value) => setToggles(t => ({ ...t, [key]: value }))}
             />
@@ -102,14 +100,6 @@ export default function App() {
           </div>
         </section>
 
-        {sheet === 'stake' && (
-          <BetSheet
-            stake={state.stake}
-            balance={state.balance}
-            onClose={close}
-            onApply={stake => { dispatch({ type: 'setStake', stake }); close() }}
-          />
-        )}
         {sheet === 'menu' && (
           <Menu
             balance={state.balance}
