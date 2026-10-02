@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { BET_CHIPS, COLORS, MULTIPLIERS, type Color } from '../game/config'
+import { COLORS, MULTIPLIERS, STAKE_STEPS, type Color } from '../game/config'
 import type { Outcome } from '../game/useGame'
 import { formatCoins } from './Header'
 import { CloseIcon } from './icons'
@@ -30,7 +30,7 @@ function botsFor(round: number, result: Color): Row[] {
   return Array.from({ length: 3 }, (_, k) => {
     const seed = round * 101 + k * 7
     const color = COLORS[Math.floor(rand(seed) * 3)]
-    const stake = BET_CHIPS[Math.floor(rand(seed + 1000) * BET_CHIPS.length)]
+    const stake = STAKE_STEPS[1 + Math.floor(rand(seed + 1000) * 5)]
     const won = color === result
     return {
       id: `b${round}-${k}`,

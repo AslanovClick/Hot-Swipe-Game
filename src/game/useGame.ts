@@ -1,6 +1,6 @@
 import { useEffect, useReducer, useRef } from 'react'
 import {
-  ADVANCE_MS, AMBASSADOR_COST_MULT, BET_CHIPS, BETTING_MS, DEFAULT_STAKE, MULTIPLIERS, RESULT_MS, RESULT_NO_BET_MS, REVEAL_MAX_MS, START_BALANCE,
+  ADVANCE_MS, AMBASSADOR_COST_MULT, BETTING_MS, DEFAULT_STAKE, MULTIPLIERS, RESULT_MS, RESULT_NO_BET_MS, REVEAL_MAX_MS, START_BALANCE,
   type Color,
 } from './config'
 import { roundInfo } from './scenes'
@@ -98,7 +98,7 @@ function nextRound(s: GameState): GameState {
     pick: null,
     bet: null,
     outcome: null,
-    stake: s.stake <= s.balance ? s.stake : [...BET_CHIPS].reverse().find(v => v <= s.balance) ?? BET_CHIPS[0],
+    stake: Math.min(s.stake, Math.max(1, Math.floor(s.balance))),
   }
 }
 
