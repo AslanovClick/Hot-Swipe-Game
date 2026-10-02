@@ -486,7 +486,8 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   flex-direction: column;
   justify-content: center;
   gap: 14px;
-  padding: 10px 12px;
+  /* Right side a touch wider: the round toggle tracks make the left edge look looser */
+  padding: 10px 15px 10px 12px;
 }
 .toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .toggle input { position: absolute; opacity: 0; pointer-events: none; }
@@ -509,7 +510,7 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .toggle input:checked + .toggle-track { background: var(--cta); }
 .toggle input:checked + .toggle-track .toggle-knob { transform: translateX(16px); background: #fff; }
 .toggle-label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   line-height: 1;
   letter-spacing: 0.4px;
