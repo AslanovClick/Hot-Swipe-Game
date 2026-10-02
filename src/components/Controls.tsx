@@ -1,17 +1,10 @@
 import { useEffect, useRef } from 'react'
-import { BETTING_MS, COLOR_LABEL, COLORS, MULTIPLIERS, STAKE_STEPS, type Color } from '../game/config'
+import { BET_CHIPS, BETTING_MS, COLOR_LABEL, COLORS, MULTIPLIERS, type Color } from '../game/config'
 import { betCost, phaseDuration, type GameState } from '../game/useGame'
 import { ModelInfo } from './Feed'
 import { formatCoins } from './Header'
 import { CheckIcon, HeartIcon } from './icons'
 import { Toggle } from './Toggle'
-
-export const stepStake = (stake: number, dir: 1 | -1, max: number) => {
-  const next = dir > 0
-    ? STAKE_STEPS.find(v => v > stake) ?? stake
-    : [...STAKE_STEPS].reverse().find(v => v < stake) ?? STAKE_STEPS[0]
-  return Math.max(1, Math.min(next, Math.max(1, Math.floor(max))))
-}
 
 // Timer (top center of the scene) and model name (bottom left, above the dock)
 export function SceneHud({ state }: { state: GameState }) {
@@ -111,20 +104,19 @@ export function BetPanel({ state, onPick, onBet, onNext, onStake, toggles, onTog
         </div>
 
         <div className="block bet-block">
-          <div className="stepper">
-            <button
-              className="stake-step"
-              onClick={() => onStake(stepStake(stake, -1, balance))}
-              disabled={locked}
-              aria-label="Decrease bet"
-            >−</button>
-            <span key={stake} className="stake-value" aria-live="polite">{formatCoins(stake)}</span>
-            <button
-              className="stake-step"
-              onClick={() => onStake(stepStake(stake, 1, balance))}
-              disabled={locked}
-              aria-label="Increase bet"
-            >+</button>
+          <div className="chips" role="radiogroup" aria-label="Bet amount">
+            {BET_CHIPS.map(v => (
+              <button
+                key={v}
+                role="radio"
+                aria-checked={stake === v}
+                className={`chip ${stake === v ? 'is-active' : ''}`}
+                onClick={() => onStake(v)}
+                disabled={locked || v > balance}
+              >
+                {v}
+              </button>
+            ))}
           </div>
 
           {phase === 'result' ? (
