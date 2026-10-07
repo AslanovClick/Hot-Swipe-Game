@@ -1,4 +1,6 @@
-import { COLORS, RESULT_WEIGHTS, type Color } from './config'
+import { COLORS, modeFor, resultWeights, type Color } from './config'
+
+export type Country = 'es' | 'us' | 'gb'
 
 // Each model has an idle loop (shown while betting) and one reveal video per color;
 // the reveal for the drawn result plays, and the round settles when it ends.
@@ -7,19 +9,21 @@ export interface Model {
   name: string
   age: number
   city: string
+  country: Country
   idle: string
   reveal: Record<Color, string>
   // Still frame for cards (media fragment: first second of the idle loop)
   poster: string
 }
 
-const model = (n: number, name: string, age: number, city: string): Model => {
+const model = (n: number, name: string, age: number, city: string, country: Country): Model => {
   const dir = `/models/model-${n}`
   return {
     id: String(n),
     name,
     age,
     city,
+    country,
     idle: `${dir}/idle.mp4`,
     reveal: { black: `${dir}/black.mp4`, red: `${dir}/red.mp4`, white: `${dir}/white.mp4` },
     poster: `${dir}/idle.mp4#t=1`,
@@ -27,9 +31,9 @@ const model = (n: number, name: string, age: number, city: string): Model => {
 }
 
 export const MODELS: Model[] = [
-  model(4, 'Sofia', 23, 'Miami, USA'),
-  model(5, 'Bella', 24, 'Los Angeles, USA'),
-  model(6, 'Ruby', 22, 'New York, USA'),
+  model(4, 'Sofia', 23, 'Barcelona, Spain', 'es'),
+  model(5, 'Bella', 24, 'Los Angeles, USA', 'us'),
+  model(6, 'Ruby', 22, 'London, UK', 'gb'),
 ]
 
 // Everything random about a round (model, result) is derived from a per-session seed and the
@@ -69,11 +73,13 @@ function modelIndex(round: number): number {
   return bag[mod(round, n)]
 }
 
-function pickResult(round: number): Color {
-  const total = COLORS.reduce((s, c) => s + RESULT_WEIGHTS[c], 0)
+// One roll per round, mapped through the active math mode's odds
+function pickResult(round: number, highRisk: boolean): Color {
+  const weights = resultWeights(modeFor(highRisk))
+  const total = COLORS.reduce((s, c) => s + weights[c], 0)
   let r = hash(round, 2) * total
   for (const c of COLORS) {
-    r -= RESULT_WEIGHTS[c]
+    r -= weights[c]
     if (r < 0) return c
   }
   return COLORS[COLORS.length - 1]
@@ -99,9 +105,10 @@ function devForce(): { model?: Model; result?: Color } {
 
 const FORCE = devForce()
 
-export function roundInfo(round: number, ambassador: string | null): Round {
+// Rotation: with an ambassador the same model repeats, otherwise a new random one each round
+export function roundInfo(round: number, ambassador: string | null, highRisk = false): Round {
   return {
     model: FORCE.model || (ambassador && MODELS.find(m => m.id === ambassador)) || MODELS[modelIndex(round)],
-    result: FORCE.result || pickResult(round),
+    result: FORCE.result || pickResult(round, highRisk),
   }
 }

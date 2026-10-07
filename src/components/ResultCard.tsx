@@ -1,4 +1,4 @@
-import { COLOR_LABEL, MULTIPLIERS } from '../game/config'
+import { COLOR_LABEL } from '../game/config'
 import type { Outcome } from '../game/useGame'
 import { formatCoins } from './Header'
 import { CoinIcon, HeartSolid } from './icons'
@@ -6,10 +6,9 @@ import { CoinIcon, HeartSolid } from './icons'
 export function ResultCard({ outcome, leaving }: { outcome: Outcome; leaving: boolean }) {
   const { bet, result, payout } = outcome
   const won = payout > 0
-  const kind = won ? 'win' : bet ? 'lose' : 'skip'
 
   return (
-    <div className={`result is-${kind} ${leaving ? 'is-leaving' : ''}`}>
+    <div className={`result ${won ? 'is-win' : 'is-lose'} ${leaving ? 'is-leaving' : ''}`}>
       <div className="result-glow" />
       {won && <FloatingHearts />}
 
@@ -17,22 +16,16 @@ export function ResultCard({ outcome, leaving }: { outcome: Outcome; leaving: bo
         {won ? (
           <>
             <div className="win-title">You win!</div>
-            <div className="win-mult">x{MULTIPLIERS[result].toFixed(2)}</div>
+            <div className="win-mult">x{bet.mult.toFixed(2)}</div>
             <div className="win-payout glass"><CoinIcon size={20} /> +{formatCoins(payout)}</div>
-          </>
-        ) : bet ? (
-          <>
-            <div className="lose-title">Try again!</div>
-            <div className="result-sub">
-              It was <b className="result-color">{COLOR_LABEL[result]}</b>
-              <span className="result-loss">−{formatCoins(bet.stake)}</span>
-            </div>
           </>
         ) : (
           <>
-            <div className="skip-label">It was</div>
-            <div className={`skip-color text-${result}`}>{COLOR_LABEL[result]}</div>
-            <div className="result-hint">No bet this round</div>
+            <div className="lose-title">Try again!</div>
+            <div className="result-sub">
+              It was <b className={`result-color text-${result}`}>{COLOR_LABEL[result]}</b>
+              <span className="result-loss">−{formatCoins(bet.stake)}</span>
+            </div>
           </>
         )}
       </div>

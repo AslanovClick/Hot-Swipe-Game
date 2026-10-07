@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react'
-import { BETTING_MS, COLOR_LABEL, COLORS, MULTIPLIERS, STAKE_STEPS, type Color } from '../game/config'
-import { betCost, phaseDuration, type GameState } from '../game/useGame'
+import { AMBASSADOR_COST_MULT, BETTING_MS, COLOR_LABEL, COLORS, HIGH_RISK_MODE, modeFor, STAKE_STEPS, type Color } from '../game/config'
+import { MODELS } from '../game/scenes'
+import { betCost, type GameState } from '../game/useGame'
 import { ModelInfo } from './Feed'
 import { formatCoins } from './Header'
-import { CheckIcon, HeartIcon } from './icons'
-import { Toggle } from './Toggle'
+import { BoltIcon, CheckIcon, HeartIcon, LockSmallIcon } from './icons'
 
 export const stepStake = (stake: number, dir: 1 | -1, max: number) => {
   const next = dir > 0
@@ -13,20 +13,21 @@ export const stepStake = (stake: number, dir: 1 | -1, max: number) => {
   return Math.max(1, Math.min(next, Math.max(1, Math.floor(max))))
 }
 
-// Timer (top center of the scene) and model name (bottom left, above the dock)
+// Timer (top center) and model row (name on the left, ambassador badge on the right)
 export function SceneHud({ state }: { state: GameState }) {
   const { phase } = state
   const betting = phase === 'betting'
   const remaining = betting ? Math.max(0, BETTING_MS - state.elapsed) : 0
   const urgent = betting && remaining < 1500
+  const ambassador = state.ambassador ? MODELS.find(m => m.id === state.ambassador) : null
 
   return (
     <>
-      <div className={`scene-timer ${phase === 'result' || phase === 'advancing' ? 'is-idle' : ''} ${phase === 'reveal' ? 'is-reveal' : ''}`}>
+      <div className={`scene-timer ${betting ? '' : phase === 'reveal' ? 'is-reveal' : 'is-idle'}`}>
         <div className={`timer ${urgent ? 'is-urgent' : ''}`}>
-          {betting ? `0:0${Math.ceil(remaining / 1000)}` : phase === 'reveal'
+          {phase === 'reveal'
             ? <span className="is-status">Revealing<span className="dots"><i>.</i><i>.</i><i>.</i></span></span>
-            : '0:00'}
+            : `0:0${Math.ceil(remaining / 1000)}`}
         </div>
         <div className="timebar">
           <div
@@ -37,8 +38,14 @@ export function SceneHud({ state }: { state: GameState }) {
       </div>
       <div className="scene-model">
         <ModelInfo round={state.round} phase={phase} ambassador={state.ambassador} />
-        {state.ambassador && (
-          <span className="amb-chip"><HeartIcon size={14} /> Playing with ambassador</span>
+        {ambassador && (
+          <span className="amb-badge">
+            <span className="amb-badge-photo"><video src={ambassador.poster} muted playsInline preload="metadata" /></span>
+            <span className="amb-badge-text">
+              <b><HeartIcon size={11} /> {ambassador.name}</b>
+              <small>Bet ×{AMBASSADOR_COST_MULT}</small>
+            </span>
+          </span>
         )}
       </div>
     </>
@@ -48,21 +55,19 @@ export function SceneHud({ state }: { state: GameState }) {
 interface Props {
   state: GameState
   onPick: (c: Color) => void
-  onBet: () => void
-  onNext: () => void
   onStake: (stake: number) => void
-  toggles: { autoBet: boolean; highRisk: boolean }
-  onToggle: (key: 'autoBet' | 'highRisk', value: boolean) => void
+  onHighRisk: (on: boolean) => void
 }
 
-export function BetPanel({ state, onPick, onBet, onNext, onStake, toggles, onToggle }: Props) {
-  const { phase, pick, outcome, stake, balance, bet } = state
+export function BetPanel({ state, onPick, onStake, onHighRisk }: Props) {
+  const { phase, pick, outcome, stake, balance, bet, highRisk } = state
   const betting = phase === 'betting'
-  const shownResult = phase === 'result' || phase === 'advancing' ? outcome?.result ?? null : null
-  const locked = !betting
+  const revealing = phase === 'reveal'
+  const shownResult = phase === 'result' ? outcome?.result ?? null : null
   const lockedColor = bet?.color ?? null
   const cost = betCost(state)
   const broke = cost > balance
+  const mults = modeFor(highRisk).multipliers
   const ref = useRef<HTMLDivElement>(null)
 
   // Exposes the dock height so scene overlays (model name, result text) sit right above it
@@ -74,12 +79,29 @@ export function BetPanel({ state, onPick, onBet, onNext, onStake, toggles, onTog
     return () => ro.disconnect()
   }, [])
 
+  const status = (() => {
+    if (betting) {
+      if (broke) return { text: 'Not enough balance for this bet', tone: 'warn' }
+      if (pick) return { text: `${COLOR_LABEL[pick]} picked · locks when time is up`, tone: 'on' }
+      return { text: 'Pick a color to bet', tone: '' }
+    }
+    if (bet && (revealing || phase === 'result')) {
+      return { text: `Bet locked · ${COLOR_LABEL[bet.color]} · ${formatCoins(bet.stake)}`, tone: 'locked' }
+    }
+    return { text: 'No bet this round', tone: '' }
+  })()
+
   return (
     <div className="panel" ref={ref}>
+      <div className={`panel-status ${status.tone ? `is-${status.tone}` : ''}`} aria-live="polite">
+        {status.tone === 'locked' && <LockSmallIcon />}
+        <span>{status.text}</span>
+      </div>
+
       <div className="colors" role="radiogroup" aria-label="Pick a color">
         {COLORS.map(c => {
           const selected = betting ? pick === c : lockedColor === c
-          const dimmed = (betting && pick !== null && !selected) || (locked && !selected && shownResult !== c)
+          const dimmed = (betting && pick !== null && !selected) || (!betting && !selected && shownResult !== c)
           const isResult = shownResult === c
           return (
             <button
@@ -89,63 +111,58 @@ export function BetPanel({ state, onPick, onBet, onNext, onStake, toggles, onTog
               className={[
                 'color-btn', `color-${c}`,
                 selected && 'is-selected',
+                selected && !betting && 'is-locked',
                 dimmed && 'is-dimmed',
                 isResult && 'is-result',
                 isResult && lockedColor === c && 'is-win',
               ].filter(Boolean).join(' ')}
               onClick={() => onPick(c)}
-              disabled={locked}
+              disabled={!betting}
             >
               <span className="color-name">{COLOR_LABEL[c]}</span>
-              <span className="color-mult">×{MULTIPLIERS[c].toFixed(2)}</span>
-              {selected && <span className="check"><CheckIcon /></span>}
+              <span key={mults[c]} className="color-mult">×{mults[c].toFixed(2)}</span>
+              {selected && (
+                <span className="check">{betting || isResult ? <CheckIcon size={11} /> : <LockSmallIcon size={10} />}</span>
+              )}
             </button>
           )
         })}
       </div>
 
       <div className="panel-row">
-        <div className="block toggles">
-          <Toggle label="Auto bet" checked={toggles.autoBet} onChange={v => onToggle('autoBet', v)} />
-          <Toggle label="High risk" checked={toggles.highRisk} onChange={v => onToggle('highRisk', v)} />
-        </div>
-
         <div className="block bet-block">
-          <div className="stepper">
-            <button
-              className="stake-step"
-              onClick={() => onStake(stepStake(stake, -1, balance))}
-              disabled={locked}
-              aria-label="Decrease bet"
-            >−</button>
-            <span key={stake} className="stake-value" aria-live="polite">{formatCoins(stake)}</span>
-            <button
-              className="stake-step"
-              onClick={() => onStake(stepStake(stake, 1, balance))}
-              disabled={locked}
-              aria-label="Increase bet"
-            >+</button>
+          <button
+            className="stake-step"
+            onClick={() => onStake(stepStake(stake, -1, balance))}
+            disabled={revealing}
+            aria-label="Decrease bet"
+          >−</button>
+          <div className="stake">
+            <span className="stake-label">{state.ambassador ? `Bet ×${AMBASSADOR_COST_MULT}` : 'Bet'}</span>
+            <span key={cost} className="stake-value" aria-live="polite">{formatCoins(cost)}</span>
           </div>
-
-          {phase === 'result' ? (
-            <button className={`cta cta-next ${outcome && outcome.payout === 0 ? 'is-light' : ''}`} onClick={onNext}>
-              <span
-                className="cta-progress"
-                style={{ transform: `scaleX(${Math.min(1, state.elapsed / phaseDuration(state))})` }}
-              />
-              <span className="cta-label">Play next</span>
-            </button>
-          ) : (
-            <button className="cta" onClick={onBet} disabled={!betting || !pick || broke}>
-              <span className="cta-label">
-                {!betting
-                  ? (bet ? 'Bet placed' : 'No bet')
-                  : broke ? 'Low balance' : pick ? 'Bet' : 'Pick a color'}
-              </span>
-              {betting && pick && !broke && <span className="cta-sub">{formatCoins(cost)} coins</span>}
-            </button>
-          )}
+          <button
+            className="stake-step"
+            onClick={() => onStake(stepStake(stake, 1, balance))}
+            disabled={revealing}
+            aria-label="Increase bet"
+          >+</button>
         </div>
+
+        <label className={`block risk ${highRisk ? 'is-on' : ''} ${revealing ? 'is-disabled' : ''}`}>
+          <input
+            type="checkbox"
+            checked={highRisk}
+            disabled={revealing}
+            onChange={e => onHighRisk(e.target.checked)}
+          />
+          <span className="risk-icon"><BoltIcon size={16} /></span>
+          <span className="risk-text">
+            <b>High risk</b>
+            <small>up to ×{HIGH_RISK_MODE.multipliers.white}</small>
+          </span>
+          <span className="toggle-track"><span className="toggle-knob" /></span>
+        </label>
       </div>
     </div>
   )

@@ -121,3 +121,66 @@ export const HelpIcon = ({ size = 16 }: P) => (
     <path d="M9.6 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.4M12 17v.01" />
   </Icon>
 )
+
+export const LockSmallIcon = ({ size = 12 }: P) => (
+  <Icon size={size} stroke={2.6}>
+    <rect x="5" y="11" width="14" height="9.5" rx="2.5" />
+    <path d="M8 11V8.5a4 4 0 0 1 8 0V11" />
+  </Icon>
+)
+
+export const VerifiedIcon = ({ size = 14 }: P) => (
+  <Icon size={size} stroke={2}>
+    <path d="M12 2.8l2.3 1.7 2.8-.2.9 2.7 2.3 1.6-.9 2.7.9 2.7-2.3 1.6-.9 2.7-2.8-.2L12 21.2l-2.3-1.7-2.8.2-.9-2.7-2.3-1.6.9-2.7-.9-2.7L6 6.9l.9-2.7 2.8.2L12 2.8z" />
+    <path d="M8.8 12.2l2.2 2.2 4.2-4.6" />
+  </Icon>
+)
+
+export const TrophyIcon = ({ size = 18 }: P) => (
+  <Icon size={size}>
+    <path d="M8 4h8v5a4 4 0 0 1-8 0V4zM8 6H5a2.5 2.5 0 0 0 3 4M16 6h3a2.5 2.5 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4" />
+  </Icon>
+)
+
+export const LayersIcon = ({ size = 18 }: P) => (
+  <Icon size={size}>
+    <path d="M12 3l9 5-9 5-9-5 9-5zM3 13l9 5 9-5" />
+  </Icon>
+)
+
+// Country flags as SVG (emoji flags don't render on Windows)
+export const Flag = ({ code, size = 18 }: { code: 'es' | 'us' | 'gb'; size?: number }) => {
+  const h = Math.round(size * 0.7)
+  return (
+    <svg className="flag" width={size} height={h} viewBox="0 0 20 14" aria-hidden>
+      <defs>
+        <clipPath id={`flag-${code}`}><rect width="20" height="14" rx="2.5" /></clipPath>
+      </defs>
+      <g clipPath={`url(#flag-${code})`}>
+        {code === 'es' && (
+          <>
+            <rect width="20" height="14" fill="#c60b1e" />
+            <rect y="3.5" width="20" height="7" fill="#ffc400" />
+          </>
+        )}
+        {code === 'us' && (
+          <>
+            <rect width="20" height="14" fill="#fff" />
+            {[0, 4, 8, 12].map(y => <rect key={y} y={y} width="20" height="2" fill="#b22234" />)}
+            <rect width="9" height="8" fill="#3c3b6e" />
+          </>
+        )}
+        {code === 'gb' && (
+          <>
+            <rect width="20" height="14" fill="#012169" />
+            <path d="M0 0L20 14M20 0L0 14" stroke="#fff" strokeWidth="3" />
+            <path d="M0 0L20 14M20 0L0 14" stroke="#c8102e" strokeWidth="1.2" />
+            <path d="M10 0v14M0 7h20" stroke="#fff" strokeWidth="4" />
+            <path d="M10 0v14M0 7h20" stroke="#c8102e" strokeWidth="2.2" />
+          </>
+        )}
+      </g>
+      <rect width="20" height="14" rx="2.5" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="0.6" />
+    </svg>
+  )
+}

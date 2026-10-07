@@ -18,12 +18,12 @@ interface Props {
   onRules: () => void
   onHistory: () => void
   onPreferences: () => void
-  onSoon: (label: string) => void
+  onStats: () => void
   onReset: () => void
   onClose: () => void
 }
 
-export function Menu({ balance, prefs, onPref, onRules, onHistory, onPreferences, onSoon, onReset, onClose }: Props) {
+export function Menu({ balance, prefs, onPref, onRules, onHistory, onPreferences, onStats, onReset, onClose }: Props) {
   return (
     <div className="sheet-backdrop" onClick={onClose}>
       <nav className="sheet menu" onClick={e => e.stopPropagation()} aria-label="Menu">
@@ -37,7 +37,7 @@ export function Menu({ balance, prefs, onPref, onRules, onHistory, onPreferences
         </div>
 
         <div className="glass menu-group">
-          <LinkItem icon={<StatsIcon />} label="Statistics" onClick={() => onSoon('Statistics')} />
+          <LinkItem icon={<StatsIcon />} label="Statistics" onClick={onStats} />
           <LinkItem icon={<BookIcon />} label="Game rules" onClick={onRules} />
           <LinkItem icon={<SlidersIcon />} label="Preferences" onClick={onPreferences} />
         </div>

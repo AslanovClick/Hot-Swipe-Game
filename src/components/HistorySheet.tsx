@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { COLORS, MULTIPLIERS, STAKE_STEPS, type Color } from '../game/config'
+import { COLORS, NORMAL_MODE, STAKE_STEPS, type Color } from '../game/config'
 import type { Outcome } from '../game/useGame'
 import { formatCoins } from './Header'
 import { CloseIcon } from './icons'
@@ -10,6 +10,7 @@ interface Row {
   you: boolean
   stake: number
   color: Color
+  mult: number
   won: boolean
   payout: number
 }
@@ -38,8 +39,9 @@ function botsFor(round: number, result: Color): Row[] {
       you: false,
       stake,
       color,
+      mult: NORMAL_MODE.multipliers[color],
       won,
-      payout: won ? stake * MULTIPLIERS[color] : 0,
+      payout: won ? stake * NORMAL_MODE.multipliers[color] : 0,
     }
   })
 }
@@ -48,15 +50,16 @@ export function HistorySheet({ history, onClose }: { history: Outcome[]; onClose
   const [tab, setTab] = useState<Tab>('all')
 
   const rows = useMemo(() => {
-    const mine: Row[] = history.flatMap((o, i) => o.bet ? [{
+    const mine: Row[] = history.map((o, i) => ({
       id: `y${history.length - i}`,
       player: 'You',
       you: true,
       stake: o.bet.stake,
       color: o.bet.color,
+      mult: o.bet.mult,
       won: o.payout > 0,
       payout: o.payout,
-    }] : [])
+    }))
     const all: Row[] = history.flatMap((o, i) => {
       const round = history.length - i
       const me = mine.find(r => r.id === `y${round}`)
@@ -95,7 +98,7 @@ export function HistorySheet({ history, onClose }: { history: Outcome[]; onClose
             <div key={r.id} className={`hist-row ${r.you ? 'is-you' : ''} ${r.won ? 'is-won' : ''}`}>
               <span className="hist-player">{r.player}</span>
               <span className="hist-stake">{formatCoins(r.stake)}</span>
-              <span className={`hchip ${r.won ? 'is-win' : 'is-lose'} c-${r.color}`}>{MULTIPLIERS[r.color].toFixed(2)}</span>
+              <span className={`hchip ${r.won ? 'is-win' : 'is-lose'} c-${r.color}`}>{r.mult.toFixed(2)}</span>
               <span className="hist-payout">{r.won ? `+${formatCoins(r.payout)}` : '—'}</span>
             </div>
           ))}

@@ -2,19 +2,21 @@ import { useEffect, useRef } from 'react'
 import type { Color } from '../game/config'
 import { roundInfo, type Model } from '../game/scenes'
 import type { Phase } from '../game/useGame'
-import { PinIcon } from './icons'
+import { Flag } from './icons'
 
 interface Props {
   round: number
   phase: Phase
   ambassador: string | null
+  highRisk: boolean
+  hasBet: boolean
   paused: boolean
   onSwipeNext: () => void
   onRevealEnd: () => void
 }
 
 // Slides are keyed by absolute round number so the outgoing and incoming slides animate as one strip
-export function Feed({ round, phase, ambassador, paused, onSwipeNext, onRevealEnd }: Props) {
+export function Feed({ round, phase, ambassador, highRisk, hasBet, paused, onSwipeNext, onRevealEnd }: Props) {
   const offset = phase === 'advancing' ? 1 : 0
   const startY = useRef<number | null>(null)
 
@@ -31,7 +33,7 @@ export function Feed({ round, phase, ambassador, paused, onSwipeNext, onRevealEn
       onWheel={e => { if (e.deltaY > 30) onSwipeNext() }}
     >
       {slides.map(abs => {
-        const { model, result } = roundInfo(abs, ambassador)
+        const { model, result } = roundInfo(abs, ambassador, highRisk)
         const current = abs === round
         const pos = abs - round - offset
         return (
@@ -47,7 +49,8 @@ export function Feed({ round, phase, ambassador, paused, onSwipeNext, onRevealEn
               // Current and next slides buffer fully; the rest only fetch metadata
               preload={abs === round || abs === round + 1 ? 'auto' : 'metadata'}
               idlePlaying={current && phase === 'betting' && !paused}
-              revealShown={abs < round || (current && phase !== 'betting')}
+              // A skipped round (no bet) never reveals: its idle scene just swipes away
+              revealShown={abs < round || (current && hasBet && phase !== 'betting')}
               revealPlaying={current && phase === 'reveal' && !paused}
               onRevealEnd={current ? onRevealEnd : undefined}
             />
@@ -131,7 +134,7 @@ export function ModelInfo({ round, phase, ambassador }: { round: number; phase: 
   return (
     <div key={round} className={`model-info ${phase === 'advancing' ? 'is-leaving' : ''}`}>
       <div className="model-name">{model.name}, {model.age}</div>
-      <div className="model-city"><PinIcon /> {model.city}</div>
+      <div className="model-city"><Flag code={model.country} size={16} /> {model.city}</div>
     </div>
   )
 }

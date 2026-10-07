@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { COLOR_LABEL, MULTIPLIERS } from '../game/config'
+import { COLOR_LABEL } from '../game/config'
 import type { Outcome } from '../game/useGame'
 import { GearIcon, HeartIcon, HistoryIcon, InfoIcon, LockIcon, WalletIcon } from './icons'
 
@@ -39,8 +39,19 @@ interface Props {
 
 export function Header({ balance, delta, history, ambassador, onMenu, onInfo, onAmbassadors, onHistory }: Props) {
   const shown = useTweened(balance)
+  const ref = useRef<HTMLElement>(null)
+
+  // The header floats over the full-screen scene; overlays below it read its height
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const ro = new ResizeObserver(() => el.parentElement?.style.setProperty('--header-h', `${el.offsetHeight}px`))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
   return (
-    <header className="header">
+    <header className="header" ref={ref}>
       <div className="header-top">
         <div className="logo" aria-label="Hot Swipe">
           <span>Hot</span>
@@ -74,22 +85,21 @@ export function Header({ balance, delta, history, ambassador, onMenu, onInfo, on
   )
 }
 
-// Won round: chip filled with the color that was bet on. Lost: outlined in the color that won.
-// No bet: faint outline in the winning color.
+// Played rounds only. Won: chip filled with the color that was bet on. Lost: outlined in the color that won.
 function HistoryStrip({ history, onOpen }: { history: Outcome[]; onOpen: () => void }) {
   return (
     <div className="history">
       <div className="history-chips">
         <span className="hchip is-current" aria-label="Current round">?</span>
         {history.map((o, i) => {
-          const kind = o.payout > 0 ? 'win' : o.bet ? 'lose' : 'skip'
+          const kind = o.payout > 0 ? 'win' : 'lose'
           return (
             <span
               key={history.length - i}
               className={`hchip is-${kind} c-${o.result}`}
-              title={`${COLOR_LABEL[o.result]} · ${kind === 'win' ? 'won' : kind === 'lose' ? 'lost' : 'no bet'}`}
+              title={`${COLOR_LABEL[o.result]} · ${kind === 'win' ? 'won' : 'lost'}`}
             >
-              {MULTIPLIERS[o.result].toFixed(2)}
+              {o.resultMult.toFixed(2)}
             </span>
           )
         })}
