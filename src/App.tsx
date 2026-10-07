@@ -72,6 +72,7 @@ export default function App() {
               onPick={color => dispatch({ type: 'pick', color })}
               onStake={stake => dispatch({ type: 'setStake', stake })}
               onHighRisk={on => dispatch({ type: 'setHighRisk', on })}
+              onAutoBet={on => dispatch({ type: 'setAutoBet', on })}
             />
             <div className="trust"><ShieldIcon /> Virtual coins only</div>
           </div>

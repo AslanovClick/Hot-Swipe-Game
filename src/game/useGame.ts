@@ -32,6 +32,7 @@ export interface GameState {
   history: Outcome[] // played rounds only, newest first
   ambassador: string | null // model id
   highRisk: boolean
+  autoBet: boolean
 }
 
 type Action =
@@ -42,6 +43,7 @@ type Action =
   | { type: 'resetBalance' }
   | { type: 'setAmbassador'; id: string | null }
   | { type: 'setHighRisk'; on: boolean }
+  | { type: 'setAutoBet'; on: boolean }
   | { type: 'revealEnded' }
 
 const HISTORY_LIMIT = 50
@@ -91,13 +93,16 @@ function advance(s: GameState): GameState {
   return { ...s, phase: 'advancing', elapsed: 0 }
 }
 
+// Auto bet: each new round starts with the color of the last bet already picked (still switchable)
+const autoPick = (s: GameState): Color | null => (s.autoBet ? s.history[0]?.bet.color ?? null : null)
+
 function nextRound(s: GameState): GameState {
   return {
     ...s,
     round: s.round + 1,
     phase: 'betting',
     elapsed: 0,
-    pick: null,
+    pick: autoPick(s),
     bet: null,
     outcome: null,
     stake: Math.min(s.stake, Math.max(1, Math.floor(s.balance))),
@@ -133,10 +138,14 @@ function reducer(s: GameState, a: Action): GameState {
     case 'setHighRisk':
       // Betting controls are locked while a reveal plays
       return s.phase === 'reveal' ? s : { ...s, highRisk: a.on }
+    case 'setAutoBet': {
+      const next = { ...s, autoBet: a.on }
+      return a.on && s.phase === 'betting' && s.pick === null ? { ...next, pick: autoPick(next) } : next
+    }
     case 'setAmbassador':
       // Switch right away if the round hasn't been played yet; otherwise from the next round
       return s.phase === 'betting'
-        ? { ...s, ambassador: a.id, elapsed: 0, pick: null }
+        ? { ...s, ambassador: a.id, elapsed: 0, pick: autoPick(s) }
         : { ...s, ambassador: a.id }
   }
 }
@@ -179,6 +188,7 @@ export function useGame(paused: boolean) {
     history: [],
     ambassador: null,
     highRisk: false,
+    autoBet: false,
   }))
 
   const pausedRef = useRef(paused)
@@ -202,6 +212,10 @@ export function useGame(paused: boolean) {
   useEffect(() => {
     if (import.meta.env.DEV) (window as unknown as Record<string, unknown>).__hotswipe = dispatch
   }, [])
+
+  useEffect(() => {
+    if (import.meta.env.DEV) (window as unknown as Record<string, unknown>).__hotswipeState = state
+  }, [state])
 
   useEffect(() => {
     try { localStorage.setItem(STORAGE_KEY, String(state.balance)) } catch { /* storage unavailable */ }

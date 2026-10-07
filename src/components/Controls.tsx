@@ -1,10 +1,10 @@
-import { useEffect, useRef } from 'react'
-import { AMBASSADOR_COST_MULT, BETTING_MS, COLOR_LABEL, COLORS, HIGH_RISK_MODE, modeFor, STAKE_STEPS, type Color } from '../game/config'
+import { useEffect, useRef, type ReactNode } from 'react'
+import { AMBASSADOR_COST_MULT, BETTING_MS, COLOR_LABEL, COLORS, modeFor, STAKE_STEPS, type Color } from '../game/config'
 import { MODELS } from '../game/scenes'
 import { betCost, type GameState } from '../game/useGame'
 import { ModelInfo } from './Feed'
 import { formatCoins } from './Header'
-import { BoltIcon, CheckIcon, HeartIcon, LockSmallIcon } from './icons'
+import { BoltIcon, CheckIcon, ClockIcon, HeartIcon, LockSmallIcon, RepeatIcon } from './icons'
 
 export const stepStake = (stake: number, dir: 1 | -1, max: number) => {
   const next = dir > 0
@@ -13,42 +13,23 @@ export const stepStake = (stake: number, dir: 1 | -1, max: number) => {
   return Math.max(1, Math.min(next, Math.max(1, Math.floor(max))))
 }
 
-// Timer (top center) and model row (name on the left, ambassador badge on the right)
+// Model row above the dock: name on the left, selected ambassador badge on the right
 export function SceneHud({ state }: { state: GameState }) {
-  const { phase } = state
-  const betting = phase === 'betting'
-  const remaining = betting ? Math.max(0, BETTING_MS - state.elapsed) : 0
-  const urgent = betting && remaining < 1500
   const ambassador = state.ambassador ? MODELS.find(m => m.id === state.ambassador) : null
 
   return (
-    <>
-      <div className={`scene-timer ${betting ? '' : phase === 'reveal' ? 'is-reveal' : 'is-idle'}`}>
-        <div className={`timer ${urgent ? 'is-urgent' : ''}`}>
-          {phase === 'reveal'
-            ? <span className="is-status">Revealing<span className="dots"><i>.</i><i>.</i><i>.</i></span></span>
-            : `0:0${Math.ceil(remaining / 1000)}`}
-        </div>
-        <div className="timebar">
-          <div
-            className={`timebar-fill ${urgent ? 'is-urgent' : ''}`}
-            style={{ transform: `scaleX(${betting ? remaining / BETTING_MS : 0})` }}
-          />
-        </div>
-      </div>
-      <div className="scene-model">
-        <ModelInfo round={state.round} phase={phase} ambassador={state.ambassador} />
-        {ambassador && (
-          <span className="amb-badge">
-            <span className="amb-badge-photo"><video src={ambassador.poster} muted playsInline preload="metadata" /></span>
-            <span className="amb-badge-text">
-              <b><HeartIcon size={11} /> {ambassador.name}</b>
-              <small>Bet ×{AMBASSADOR_COST_MULT}</small>
-            </span>
+    <div className="scene-model">
+      <ModelInfo round={state.round} phase={state.phase} ambassador={state.ambassador} />
+      {ambassador && (
+        <span className="amb-badge">
+          <span className="amb-badge-photo"><video src={ambassador.poster} muted playsInline preload="metadata" /></span>
+          <span className="amb-badge-text">
+            <b><HeartIcon size={12} /> {ambassador.name}</b>
+            <small>Bet ×{AMBASSADOR_COST_MULT}</small>
           </span>
-        )}
-      </div>
-    </>
+        </span>
+      )}
+    </div>
   )
 }
 
@@ -57,17 +38,19 @@ interface Props {
   onPick: (c: Color) => void
   onStake: (stake: number) => void
   onHighRisk: (on: boolean) => void
+  onAutoBet: (on: boolean) => void
 }
 
-export function BetPanel({ state, onPick, onStake, onHighRisk }: Props) {
-  const { phase, pick, outcome, stake, balance, bet, highRisk } = state
+export function BetPanel({ state, onPick, onStake, onHighRisk, onAutoBet }: Props) {
+  const { phase, pick, outcome, stake, balance, bet, highRisk, autoBet } = state
   const betting = phase === 'betting'
   const revealing = phase === 'reveal'
   const shownResult = phase === 'result' ? outcome?.result ?? null : null
   const lockedColor = bet?.color ?? null
   const cost = betCost(state)
-  const broke = cost > balance
   const mults = modeFor(highRisk).multipliers
+  const remaining = betting ? Math.max(0, BETTING_MS - state.elapsed) : 0
+  const urgent = betting && remaining < 1500
   const ref = useRef<HTMLDivElement>(null)
 
   // Exposes the dock height so scene overlays (model name, result text) sit right above it
@@ -79,23 +62,14 @@ export function BetPanel({ state, onPick, onStake, onHighRisk }: Props) {
     return () => ro.disconnect()
   }, [])
 
-  const status = (() => {
-    if (betting) {
-      if (broke) return { text: 'Not enough balance for this bet', tone: 'warn' }
-      if (pick) return { text: `${COLOR_LABEL[pick]} picked · locks when time is up`, tone: 'on' }
-      return { text: 'Pick a color to bet', tone: '' }
-    }
-    if (bet && (revealing || phase === 'result')) {
-      return { text: `Bet locked · ${COLOR_LABEL[bet.color]} · ${formatCoins(bet.stake)}`, tone: 'locked' }
-    }
-    return { text: 'No bet this round', tone: '' }
-  })()
-
   return (
     <div className="panel" ref={ref}>
-      <div className={`panel-status ${status.tone ? `is-${status.tone}` : ''}`} aria-live="polite">
-        {status.tone === 'locked' && <LockSmallIcon />}
-        <span>{status.text}</span>
+      {/* Betting countdown lives in the panel so it never covers the model */}
+      <div className={`panel-timer ${betting ? '' : 'is-hidden'} ${urgent ? 'is-urgent' : ''}`} aria-label="Time to bet">
+        <span className="panel-timer-num"><ClockIcon size={15} /> 0:0{Math.ceil(remaining / 1000)}</span>
+        <span className="panel-timer-bar">
+          <span style={{ transform: `scaleX(${remaining / BETTING_MS})` }} />
+        </span>
       </div>
 
       <div className="colors" role="radiogroup" aria-label="Pick a color">
@@ -111,7 +85,6 @@ export function BetPanel({ state, onPick, onStake, onHighRisk }: Props) {
               className={[
                 'color-btn', `color-${c}`,
                 selected && 'is-selected',
-                selected && !betting && 'is-locked',
                 dimmed && 'is-dimmed',
                 isResult && 'is-result',
                 isResult && lockedColor === c && 'is-win',
@@ -130,6 +103,18 @@ export function BetPanel({ state, onPick, onStake, onHighRisk }: Props) {
       </div>
 
       <div className="panel-row">
+        <div className="block toggles">
+          <Switch icon={<RepeatIcon size={14} />} label="Auto bet" checked={autoBet} onChange={onAutoBet} />
+          <Switch
+            icon={<BoltIcon size={14} />}
+            label="High risk"
+            checked={highRisk}
+            onChange={onHighRisk}
+            disabled={revealing}
+            tone="gold"
+          />
+        </div>
+
         <div className="block bet-block">
           <button
             className="stake-step"
@@ -148,22 +133,27 @@ export function BetPanel({ state, onPick, onStake, onHighRisk }: Props) {
             aria-label="Increase bet"
           >+</button>
         </div>
-
-        <label className={`block risk ${highRisk ? 'is-on' : ''} ${revealing ? 'is-disabled' : ''}`}>
-          <input
-            type="checkbox"
-            checked={highRisk}
-            disabled={revealing}
-            onChange={e => onHighRisk(e.target.checked)}
-          />
-          <span className="risk-icon"><BoltIcon size={16} /></span>
-          <span className="risk-text">
-            <b>High risk</b>
-            <small>up to ×{HIGH_RISK_MODE.multipliers.white}</small>
-          </span>
-          <span className="toggle-track"><span className="toggle-knob" /></span>
-        </label>
       </div>
     </div>
+  )
+}
+
+interface SwitchProps {
+  icon: ReactNode
+  label: string
+  checked: boolean
+  onChange: (on: boolean) => void
+  disabled?: boolean
+  tone?: 'pink' | 'gold'
+}
+
+function Switch({ icon, label, checked, onChange, disabled, tone = 'pink' }: SwitchProps) {
+  return (
+    <label className={`switch tone-${tone} ${checked ? 'is-on' : ''} ${disabled ? 'is-disabled' : ''}`}>
+      <input type="checkbox" checked={checked} disabled={disabled} onChange={e => onChange(e.target.checked)} />
+      <span className="switch-icon">{icon}</span>
+      <span className="switch-label">{label}</span>
+      <span className="toggle-track"><span className="toggle-knob" /></span>
+    </label>
   )
 }

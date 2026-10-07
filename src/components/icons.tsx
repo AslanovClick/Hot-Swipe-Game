@@ -184,3 +184,16 @@ export const Flag = ({ code, size = 18 }: { code: 'es' | 'us' | 'gb'; size?: num
     </svg>
   )
 }
+
+export const RepeatIcon = ({ size = 16 }: P) => (
+  <Icon size={size}>
+    <path d="M17 2.5l3 3-3 3M4 11V9.5a4 4 0 0 1 4-4h12M7 21.5l-3-3 3-3M20 13v1.5a4 4 0 0 1-4 4H4" />
+  </Icon>
+)
+
+export const ClockIcon = ({ size = 16 }: P) => (
+  <Icon size={size} stroke={2.4}>
+    <circle cx="12" cy="13" r="8" />
+    <path d="M12 9v4l2.5 2M9.5 2.5h5" />
+  </Icon>
+)
