@@ -61,6 +61,16 @@ export function Header({ balance, delta, history, ambassador, onMenu, onInfo, on
         <div className="header-actions">
           <button className="hbtn" onClick={onInfo} aria-label="How to play"><InfoIcon /></button>
           <div className="hbtn balance" aria-label="Balance">
+            {/* Accent gradient for the wallet stroke, same stops as the CTA buttons */}
+            <svg width="0" height="0" className="svg-defs" aria-hidden>
+              <defs>
+                <linearGradient id="accent-stroke" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stopColor="#ff4fa6" />
+                  <stop offset="0.5" stopColor="#f23cf8" />
+                  <stop offset="1" stopColor="#8a4dff" />
+                </linearGradient>
+              </defs>
+            </svg>
             <WalletIcon />
             <span className="balance-value">{formatCoins(shown)}</span>
             {delta !== null && delta > 0 && (

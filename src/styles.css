@@ -180,7 +180,8 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-.balance svg { color: #b98cff; }
+.balance svg { stroke: url(#accent-stroke); filter: drop-shadow(0 0 4px rgba(240, 70, 255, 0.35)); }
+.svg-defs { position: absolute; width: 0; height: 0; }
 
 .balance-delta {
   position: absolute;
