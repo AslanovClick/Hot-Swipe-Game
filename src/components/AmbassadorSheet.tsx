@@ -25,37 +25,40 @@ export function AmbassadorSheet({ current, stake, onSelect, onClose }: Props) {
     <div className="sheet-backdrop" onClick={onClose}>
       {confirm ? (
         <div key="confirm" className="sheet amb-confirm" onClick={e => e.stopPropagation()} role="dialog" aria-label="Play with ambassador">
-          <button className="sheet-x" onClick={onClose} aria-label="Close"><CloseIcon /></button>
+          <div className="sheet-head">
+            <span className="sheet-head-title">Ambassador mode</span>
+            <button className="sheet-x" onClick={onClose} aria-label="Close"><CloseIcon /></button>
+          </div>
 
           <div className="amb-hero">
             <video src={confirm.poster} muted playsInline preload="metadata" />
             <span className="amb-hero-shade" />
             <span className="amb-tile-official"><VerifiedIcon size={11} /> Official ambassador</span>
             <span className="amb-hero-info">
-              <b>Play with {confirm.name}</b>
-              <span><Flag code={confirm.country} size={16} /> {confirm.name}, {confirm.age} · {COUNTRY[confirm.country]}</span>
+              <b>{confirm.name}, {confirm.age}</b>
+              <span><Flag code={confirm.country} size={16} /> {COUNTRY[confirm.country]}</span>
             </span>
           </div>
 
           <div className="amb-price">
-            <div className="amb-price-col">
-              <span>Standard bet</span>
-              <s>{formatCoins(stake)}</s>
+            <div className="amb-price-top">
+              <span>Bet per round</span>
+              <span className="amb-price-mult">×{AMBASSADOR_COST_MULT}</span>
             </div>
-            <span className="amb-price-mult">×{AMBASSADOR_COST_MULT}</span>
-            <div className="amb-price-col is-new">
-              <span>With {confirm.name}</span>
+            <div className="amb-price-values">
+              <s>{formatCoins(stake)}</s>
+              <span className="amb-price-arrow">→</span>
               <b>{formatCoins(stake * AMBASSADOR_COST_MULT)}</b>
             </div>
           </div>
 
           <ul className="amb-perks">
-            <li><span><RepeatIcon size={14} /></span>{confirm.name} stars in every round, at the new bet</li>
+            <li><span><RepeatIcon size={14} /></span>{confirm.name} stars in every round at the new bet</li>
             <li><span><LockIcon size={14} /></span>Switch it off anytime</li>
           </ul>
 
           <button className="cta amb-continue" onClick={() => onSelect(confirm.id)}>
-            <span className="cta-label">Continue</span>
+            <span className="cta-label">Play with {confirm.name}</span>
           </button>
           <button className="amb-cancel" onClick={() => setConfirm(null)}>Back</button>
         </div>
