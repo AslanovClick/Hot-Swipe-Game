@@ -180,7 +180,7 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-.balance svg { color: var(--gold); }
+.balance svg { color: #b98cff; }
 
 .balance-delta {
   position: absolute;
