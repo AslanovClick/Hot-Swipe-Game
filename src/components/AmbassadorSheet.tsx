@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { AMBASSADOR_COST_MULT } from '../game/config'
 import { MODELS, type Model } from '../game/scenes'
 import { formatCoins } from './Header'
-import { CloseIcon, Flag, HeartIcon, VerifiedIcon } from './icons'
+import { CheckIcon, CloseIcon, Flag, HeartIcon, VerifiedIcon } from './icons'
 
 interface Props {
   current: string | null
@@ -14,10 +14,12 @@ interface Props {
 const COUNTRY: Record<Model['country'], string> = { es: 'Spain', us: 'USA', gb: 'UK' }
 
 export function AmbassadorSheet({ current, stake, onSelect, onClose }: Props) {
+  const [focus, setFocus] = useState<string | null>(current ?? MODELS[0].id)
   const [confirm, setConfirm] = useState<Model | null>(null)
+  const focused = MODELS.find(m => m.id === focus) ?? null
 
   // The cost notice is shown when the mode is switched on; switching between ambassadors skips it
-  const choose = (m: Model) => (current ? onSelect(m.id) : setConfirm(m))
+  const play = (m: Model) => (current ? onSelect(m.id) : setConfirm(m))
 
   return (
     <div className="sheet-backdrop" onClick={onClose}>
@@ -53,32 +55,49 @@ export function AmbassadorSheet({ current, stake, onSelect, onClose }: Props) {
       ) : (
         <div key="list" className="sheet amb-sheet" onClick={e => e.stopPropagation()} role="dialog" aria-label="Our ambassadors">
           <button className="sheet-x" onClick={onClose} aria-label="Close"><CloseIcon /></button>
-          <div className="amb-hero"><HeartIcon size={22} /></div>
           <div className="sheet-title">Our ambassadors</div>
           <div className="sheet-sub">Pick your favorite and play with her</div>
-          <div className="amb-mode-note">Ambassador mode · bet ×{AMBASSADOR_COST_MULT}</div>
 
-          <div className="amb-list">
-            {MODELS.map(m => {
-              const active = m.id === current
+          <div className="amb-grid" role="radiogroup" aria-label="Ambassadors">
+            {MODELS.map((m, i) => {
+              const isFocus = m.id === focus
+              const isCurrent = m.id === current
               return (
-                <button key={m.id} className={`amb-card ${active ? 'is-active' : ''}`} onClick={() => !active && choose(m)}>
-                  <span className="amb-photo"><video src={m.poster} muted playsInline preload="metadata" /></span>
-                  <span className="amb-info">
-                    <span className="amb-name">{m.name}, {m.age}</span>
-                    <span className="amb-country"><Flag code={m.country} size={18} /> {COUNTRY[m.country]}</span>
-                    <span className="amb-role"><VerifiedIcon size={13} /> Official ambassador</span>
+                <button
+                  key={m.id}
+                  role="radio"
+                  aria-checked={isFocus}
+                  className={`amb-tile ${isFocus ? 'is-focus' : ''}`}
+                  style={{ animationDelay: `${i * 70}ms` }}
+                  onClick={() => setFocus(m.id)}
+                >
+                  <video className="amb-tile-photo" src={m.poster} muted playsInline preload="metadata" />
+                  <span className="amb-tile-shade" />
+                  <span className="amb-tile-official"><VerifiedIcon size={11} /> Official</span>
+                  {isCurrent && <span className="amb-tile-playing"><HeartIcon size={11} /></span>}
+                  <span className="amb-tile-info">
+                    <b>{m.name}, {m.age}</b>
+                    <span><Flag code={m.country} size={14} /> {COUNTRY[m.country]}</span>
                   </span>
-                  {active
-                    ? <span className="amb-playing"><HeartIcon size={12} /> Playing</span>
-                    : <span className="cta amb-play"><span className="cta-label">Play</span></span>}
+                  {isFocus && <span className="amb-tile-check"><CheckIcon size={11} /></span>}
                 </button>
               )
             })}
           </div>
 
+          <div className="amb-mode-note"><HeartIcon size={12} /> Ambassador mode · every round at bet ×{AMBASSADOR_COST_MULT}</div>
+
+          <button
+            className="cta amb-continue"
+            disabled={!focused || focused.id === current}
+            onClick={() => focused && play(focused)}
+          >
+            <span className="cta-label">
+              {!focused ? 'Pick an ambassador' : focused.id === current ? `Playing with ${focused.name}` : `Play with ${focused.name}`}
+            </span>
+          </button>
           {current && (
-            <button className="glass btn-ghost amb-none" onClick={() => onSelect(null)}>Play without ambassador</button>
+            <button className="amb-cancel" onClick={() => onSelect(null)}>Play without ambassador</button>
           )}
         </div>
       )}
