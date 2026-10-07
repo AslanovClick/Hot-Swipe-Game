@@ -5,11 +5,11 @@
   --text-faint: rgba(255, 255, 255, 0.42);
 
   /* Accents: hot pink → violet, a touch brighter than before */
-  --pink: #ff4fc8;
-  --violet: #9b4dff;
-  --accent-glow: rgba(230, 70, 240, 0.45);
-  --cta: linear-gradient(135deg, #ff5fb4 0%, #e03df0 50%, #9a4dff 100%);
-  --cta-border: rgba(255, 170, 245, 0.4);
+  --pink: #ff3fd0;
+  --violet: #8f4dff;
+  --accent-glow: rgba(240, 70, 255, 0.55);
+  --cta: linear-gradient(135deg, #ff4fa6 0%, #f23cf8 50%, #8a4dff 100%);
+  --cta-border: rgba(255, 180, 250, 0.5);
   --gold: #ffcb45;
   --win: #3ff0a6;
   --lose: #ff5a7a;
@@ -23,9 +23,9 @@
 
   /* Surfaces */
   --bar: #0e0915;
-  --panel-bg: linear-gradient(180deg, rgba(40, 26, 58, 0.95), rgba(20, 12, 30, 0.97));
-  --block: linear-gradient(180deg, #2a1d3d, #24182f);
-  --well: #0e0816;
+  --panel-bg: linear-gradient(180deg, rgba(62, 30, 92, 0.94), rgba(34, 16, 54, 0.96));
+  --block: linear-gradient(180deg, #43265f, #361d4e);
+  --well: #1a0d2a;
   --hairline: rgba(255, 255, 255, 0.1);
 
   /* Soft volume: top light + bottom shade + drop. Modern, not glossy */
@@ -118,7 +118,7 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 }
 .scrim-bottom {
   position: absolute; inset: auto 0 0 0; height: 62%;
-  background: linear-gradient(to top, rgba(14, 9, 22, 0.95) 22%, rgba(14, 9, 22, 0.5) 58%, transparent);
+  background: linear-gradient(to top, rgba(30, 10, 46, 0.95) 22%, rgba(40, 12, 60, 0.45) 58%, transparent);
   transition: opacity 450ms ease;
 }
 /* During the reveal the whole clip should read, so the bottom shade mostly lifts */
@@ -161,8 +161,8 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   display: grid;
   place-items: center;
   border-radius: 999px;
-  background: rgba(30, 20, 44, 0.66);
-  border: 0.5px solid var(--hairline);
+  background: rgba(52, 26, 78, 0.68);
+  border: 0.5px solid rgba(255, 140, 235, 0.22);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: var(--lift-soft);
@@ -353,10 +353,10 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   padding: 10px;
   border-radius: 22px;
   background: var(--panel-bg);
-  border: 0.5px solid var(--hairline);
+  border: 0.5px solid rgba(255, 120, 235, 0.28);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 14px 34px rgba(0, 0, 0, 0.45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 14px 34px rgba(20, 0, 40, 0.5), 0 0 30px rgba(220, 60, 255, 0.12);
   transition: padding 420ms var(--ease), border-radius 420ms var(--ease);
 }
 
@@ -413,7 +413,7 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   align-items: center;
   justify-content: center;
   gap: 4px;
-  border-radius: 999px;
+  border-radius: 16px;
   box-shadow: var(--lift);
   transition: transform 220ms var(--ease), opacity 220ms, filter 220ms, box-shadow 220ms, height 420ms var(--ease);
 }
@@ -431,8 +431,8 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 }
 @keyframes tick-in { from { opacity: 0.3; transform: translateY(3px); } }
 
-.color-black { background: linear-gradient(180deg, #2e2a36 0%, #141217 100%); color: #fff; }
-.color-red { background: linear-gradient(180deg, #f9416a 0%, #d5163e 100%); color: #fff; }
+.color-black { background: linear-gradient(180deg, #3a3346 0%, #17131d 100%); color: #fff; }
+.color-red { background: linear-gradient(180deg, #ff3d68 0%, #e3103e 100%); color: #fff; box-shadow: var(--lift), 0 4px 16px rgba(255, 40, 90, 0.3); }
 .color-white { background: linear-gradient(180deg, #ffffff 0%, #eee9f2 100%); color: #1a1226; }
 .color-white .color-mult { background: rgba(26, 18, 38, 0.09); }
 
@@ -440,7 +440,7 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   transform: translateY(-3px);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.14),
-    0 0 0 2px #1a1027,
+    0 0 0 2px #2c1442,
     0 0 0 4px var(--pink),
     0 6px 18px rgba(255, 79, 200, 0.38);
 }
@@ -448,21 +448,21 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
 .check {
   position: absolute;
-  top: -7px; right: 6px;
+  top: -8px; right: -7px;
   width: 22px; height: 22px;
   border-radius: 50%;
   display: grid; place-items: center;
   background: var(--cta);
   color: #fff;
-  box-shadow: 0 0 0 2px #1a1027, 0 0 10px var(--accent-glow);
+  box-shadow: 0 0 0 2px #2c1442, 0 0 10px var(--accent-glow);
   animation: pop 300ms var(--spring) both;
 }
 @keyframes pop { from { transform: scale(0); } }
 
 .color-btn.is-result { opacity: 1; filter: none; animation: pulse 1.1s ease-in-out 2; }
-.color-btn.is-result:not(.is-selected) { box-shadow: var(--lift), 0 0 0 2px #1a1027, 0 0 0 4px rgba(255, 255, 255, 0.85); }
-.color-btn.is-win { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 2px #1a1027, 0 0 0 4px var(--win), 0 10px 26px rgba(63, 240, 166, 0.45); }
-.color-btn.is-win .check { background: var(--win); box-shadow: 0 0 0 2px #1a1027, 0 0 10px rgba(63, 240, 166, 0.6); }
+.color-btn.is-result:not(.is-selected) { box-shadow: var(--lift), 0 0 0 2px #2c1442, 0 0 0 4px rgba(255, 255, 255, 0.85); }
+.color-btn.is-win { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 2px #2c1442, 0 0 0 4px var(--win), 0 10px 26px rgba(63, 240, 166, 0.45); }
+.color-btn.is-win .check { background: var(--win); box-shadow: 0 0 0 2px #2c1442, 0 0 10px rgba(63, 240, 166, 0.6); }
 @keyframes pulse { 50% { transform: scale(1.04); } }
 
 .panel-row {
@@ -596,10 +596,10 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .dock.is-compact .panel-row { max-height: 0; margin-top: -8px; opacity: 0; overflow: hidden; pointer-events: none; }
 .dock.is-compact .trust { max-height: 0; margin-top: 4px; margin-bottom: 4px; opacity: 0; }
 .dock.is-compact .colors { gap: 6px; }
-.dock.is-compact .color-btn { height: 36px; flex-direction: row; gap: 6px; transform: none; }
+.dock.is-compact .color-btn { height: 36px; flex-direction: row; gap: 6px; border-radius: 12px; transform: none; }
 .dock.is-compact .color-name { font-size: 13px; }
 .dock.is-compact .color-mult { font-size: 11px; padding: 1px 6px; }
-.dock.is-compact .check { top: -6px; right: 4px; width: 18px; height: 18px; }
+.dock.is-compact .check { top: -6px; right: -5px; width: 18px; height: 18px; }
 
 /* ---------- Buttons ---------- */
 
@@ -785,8 +785,8 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   padding: 22px 18px calc(env(safe-area-inset-bottom) + 18px);
   border-radius: 28px 28px 0 0;
   background:
-    radial-gradient(120% 50% at 50% 0%, rgba(224, 61, 240, 0.16), transparent 60%),
-    linear-gradient(180deg, #1e1330, #100a18);
+    radial-gradient(120% 50% at 50% 0%, rgba(240, 61, 255, 0.24), transparent 60%),
+    linear-gradient(180deg, #2b1642, #140a22);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 -20px 60px rgba(0, 0, 0, 0.5);
   animation: slide-up 360ms var(--ease) both;
   text-align: center;
@@ -1111,7 +1111,7 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   display: flex;
   flex-direction: column;
   padding: calc(env(safe-area-inset-top) + 14px) 18px calc(env(safe-area-inset-bottom) + 18px);
-  background: linear-gradient(180deg, #1c1129, #0e0915);
+  background: linear-gradient(180deg, #27133b, #120a1d);
   animation: fade 300ms ease both;
   overflow-y: auto;
 }
