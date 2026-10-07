@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { AMBASSADOR_COST_MULT } from '../game/config'
 import { MODELS, type Model } from '../game/scenes'
 import { formatCoins } from './Header'
-import { CheckIcon, CloseIcon, Flag, HeartIcon, VerifiedIcon } from './icons'
+import { CheckIcon, CloseIcon, Flag, HeartIcon, LockIcon, RepeatIcon, VerifiedIcon } from './icons'
 
 interface Props {
   current: string | null
@@ -26,26 +26,33 @@ export function AmbassadorSheet({ current, stake, onSelect, onClose }: Props) {
       {confirm ? (
         <div key="confirm" className="sheet amb-confirm" onClick={e => e.stopPropagation()} role="dialog" aria-label="Play with ambassador">
           <button className="sheet-x" onClick={onClose} aria-label="Close"><CloseIcon /></button>
-          <div className="amb-confirm-avatar">
-            <video src={confirm.poster} muted playsInline preload="metadata" />
-            <span className="amb-confirm-heart"><HeartIcon size={14} /></span>
-          </div>
-          <div className="sheet-title">Play with {confirm.name}</div>
-          <p className="amb-confirm-note">
-            Ambassador mode raises the cost of each round. The new bet applies to every round until you turn the mode off.
-          </p>
 
-          <div className="amb-cost">
-            <div className="amb-cost-col">
+          <div className="amb-hero">
+            <video src={confirm.poster} muted playsInline preload="metadata" />
+            <span className="amb-hero-shade" />
+            <span className="amb-tile-official"><VerifiedIcon size={11} /> Official ambassador</span>
+            <span className="amb-hero-info">
+              <b>Play with {confirm.name}</b>
+              <span><Flag code={confirm.country} size={16} /> {confirm.name}, {confirm.age} · {COUNTRY[confirm.country]}</span>
+            </span>
+          </div>
+
+          <div className="amb-price">
+            <div className="amb-price-col">
               <span>Standard bet</span>
-              <b>{formatCoins(stake)}</b>
+              <s>{formatCoins(stake)}</s>
             </div>
-            <span className="amb-cost-arrow">→</span>
-            <div className="amb-cost-col is-new">
-              <span>With ambassador</span>
+            <span className="amb-price-mult">×{AMBASSADOR_COST_MULT}</span>
+            <div className="amb-price-col is-new">
+              <span>With {confirm.name}</span>
               <b>{formatCoins(stake * AMBASSADOR_COST_MULT)}</b>
             </div>
           </div>
+
+          <ul className="amb-perks">
+            <li><span><RepeatIcon size={14} /></span>{confirm.name} stars in every round, at the new bet</li>
+            <li><span><LockIcon size={14} /></span>Switch it off anytime</li>
+          </ul>
 
           <button className="cta amb-continue" onClick={() => onSelect(confirm.id)}>
             <span className="cta-label">Continue</span>
@@ -57,6 +64,7 @@ export function AmbassadorSheet({ current, stake, onSelect, onClose }: Props) {
           <button className="sheet-x" onClick={onClose} aria-label="Close"><CloseIcon /></button>
           <div className="sheet-title">Our ambassadors</div>
           <div className="sheet-sub">Pick your favorite and play with her</div>
+          <div className="amb-mode-note"><HeartIcon size={12} /> Ambassador mode · every round at bet ×{AMBASSADOR_COST_MULT}</div>
 
           <div className="amb-grid" role="radiogroup" aria-label="Ambassadors">
             {MODELS.map((m, i) => {
@@ -67,25 +75,23 @@ export function AmbassadorSheet({ current, stake, onSelect, onClose }: Props) {
                   key={m.id}
                   role="radio"
                   aria-checked={isFocus}
-                  className={`amb-tile ${isFocus ? 'is-focus' : ''}`}
+                  className={`amb-tile ${isFocus ? 'is-focus' : ''} ${isCurrent ? 'is-current' : ''}`}
                   style={{ animationDelay: `${i * 70}ms` }}
                   onClick={() => setFocus(m.id)}
                 >
                   <video className="amb-tile-photo" src={m.poster} muted playsInline preload="metadata" />
                   <span className="amb-tile-shade" />
                   <span className="amb-tile-official"><VerifiedIcon size={11} /> Official</span>
-                  {isCurrent && <span className="amb-tile-playing"><HeartIcon size={11} /></span>}
                   <span className="amb-tile-info">
                     <b>{m.name}, {m.age}</b>
                     <span><Flag code={m.country} size={14} /> {COUNTRY[m.country]}</span>
                   </span>
+                  {isCurrent && <span className="amb-tile-now">Now playing</span>}
                   {isFocus && <span className="amb-tile-check"><CheckIcon size={11} /></span>}
                 </button>
               )
             })}
           </div>
-
-          <div className="amb-mode-note"><HeartIcon size={12} /> Ambassador mode · every round at bet ×{AMBASSADOR_COST_MULT}</div>
 
           <button
             className="cta amb-continue"

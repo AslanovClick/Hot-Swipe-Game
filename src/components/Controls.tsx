@@ -4,7 +4,7 @@ import { MODELS } from '../game/scenes'
 import { betCost, type GameState } from '../game/useGame'
 import { ModelInfo } from './Feed'
 import { formatCoins } from './Header'
-import { BoltIcon, CheckIcon, ClockIcon, HeartIcon, LockSmallIcon, RepeatIcon } from './icons'
+import { BoltIcon, CheckIcon, ClockIcon, LockSmallIcon, RepeatIcon } from './icons'
 
 export const stepStake = (stake: number, dir: 1 | -1, max: number) => {
   const next = dir > 0
@@ -24,7 +24,7 @@ export function SceneHud({ state }: { state: GameState }) {
         <span className="amb-badge">
           <span className="amb-badge-photo"><video src={ambassador.poster} muted playsInline preload="metadata" /></span>
           <span className="amb-badge-text">
-            <b><HeartIcon size={12} /> {ambassador.name}</b>
+            <b>{ambassador.name}</b>
             <small>Bet ×{AMBASSADOR_COST_MULT}</small>
           </span>
         </span>
