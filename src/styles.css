@@ -1089,17 +1089,36 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .amb-price-arrow { font-size: 18px; color: var(--text-faint); }
 .amb-price-values b { font-size: 28px; font-weight: 800; line-height: 1; color: #ff9ade; }
 
-.amb-perks { list-style: none; margin: 14px 2px 18px; padding: 0; display: flex; flex-direction: column; gap: 10px; text-align: left; }
-.amb-perks li { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; line-height: 1.3; color: rgba(255, 255, 255, 0.86); }
-.amb-perks li span {
-  width: 28px; height: 28px;
-  flex: none;
+.amb-perks {
+  list-style: none;
+  margin: 10px 0 18px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  text-align: left;
+}
+.amb-perks li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 12px 13px;
+  border-radius: 16px;
+  background: var(--block);
+  box-shadow: var(--lift-soft);
+}
+.amb-perk-icon {
+  width: 30px; height: 30px;
+  margin-bottom: 8px;
   display: grid;
   place-items: center;
   border-radius: 999px;
-  background: rgba(255, 63, 208, 0.14);
-  color: #ff8ae0;
+  background: var(--cta);
+  box-shadow: 0 0 10px var(--accent-glow);
+  color: #fff;
 }
+.amb-perks b { font-size: 14px; font-weight: 700; }
+.amb-perks small { font-size: 12px; font-weight: 500; line-height: 1.35; color: var(--text-dim); }
 
 .amb-continue { width: 100%; }
 .amb-cancel { display: block; margin: 12px auto 0; padding: 6px 12px; font-size: 14px; font-weight: 500; color: var(--text-dim); }

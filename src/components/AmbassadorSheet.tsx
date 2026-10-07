@@ -53,8 +53,16 @@ export function AmbassadorSheet({ current, stake, onSelect, onClose }: Props) {
           </div>
 
           <ul className="amb-perks">
-            <li><span><RepeatIcon size={14} /></span>{confirm.name} stars in every round at the new bet</li>
-            <li><span><LockIcon size={14} /></span>Switch it off anytime</li>
+            <li>
+              <span className="amb-perk-icon"><RepeatIcon size={15} /></span>
+              <b>Every round</b>
+              <small>{confirm.name} in each round</small>
+            </li>
+            <li>
+              <span className="amb-perk-icon"><LockIcon size={15} /></span>
+              <b>Turn off anytime</b>
+              <small>Via the lock button</small>
+            </li>
           </ul>
 
           <button className="cta amb-continue" onClick={() => onSelect(confirm.id)}>
