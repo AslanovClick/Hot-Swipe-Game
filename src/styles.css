@@ -224,8 +224,9 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   flex: 1;
   display: flex;
   gap: 6px;
-  padding: 2px 0 9px;
-  margin-bottom: -9px;
+  /* Room for the current chip's glow: a scroller clips everything outside its padding box */
+  padding: 10px 0 9px 12px;
+  margin: -8px 0 -9px -12px;
   overflow-x: auto;
   scrollbar-width: none;
   mask-image: linear-gradient(to right, #000 80%, transparent);

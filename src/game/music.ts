@@ -49,7 +49,17 @@ function apply() {
   }
 }
 
-// Browsers only allow sound after a user gesture, so the context is created on the first tap or key
+// Browsers only allow sound after a user gesture. On touch screens only the end of a tap counts
+// (not pointerdown), so the listeners stay until the context is actually running.
+const GESTURES = ['pointerup', 'touchend', 'click', 'keydown'] as const
+
+function listen(on: boolean) {
+  for (const e of GESTURES) {
+    if (on) window.addEventListener(e, unlock, { capture: true })
+    else window.removeEventListener(e, unlock, { capture: true })
+  }
+}
+
 function unlock() {
   if (!wanted) return
   if (!ctx) {
@@ -60,8 +70,8 @@ function unlock() {
   }
   start()
   apply()
-  window.removeEventListener('pointerdown', unlock)
-  window.removeEventListener('keydown', unlock)
+  const c = ctx
+  c.resume().then(() => { if (c.state === 'running') listen(false) }).catch(() => {})
 }
 
 // Dev hook for checks: __music() → context state, current gain, whether the loop started
@@ -72,14 +82,10 @@ if (import.meta.env.DEV) {
 export function useMusic(enabled: boolean) {
   useEffect(() => {
     wanted = enabled
-    // Turned on from the menu: the page has already had a gesture, so sound can start right away
-    if (enabled && !ctx && navigator.userActivation?.hasBeenActive) unlock()
-    else if (enabled && !ctx) {
-      window.addEventListener('pointerdown', unlock)
-      window.addEventListener('keydown', unlock)
-    } else {
-      apply()
-    }
+    if (!enabled) return apply()
+    // Turned on after the page has had a gesture: sound can start right away
+    if (navigator.userActivation?.hasBeenActive) unlock()
+    if (ctx?.state !== 'running') listen(true)
   }, [enabled])
 
   useEffect(() => {
