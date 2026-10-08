@@ -14,11 +14,6 @@ interface Option { id: string; label: string; visual: ReactNode }
 
 const img = (src: string) => <img src={src} alt="" draggable={false} />
 
-// Body-type artwork is a single-color SVG used as a mask, so it follows currentColor
-const bodyArt = (id: string) => (
-  <span className="onb-body-art" style={{ maskImage: `url(/onboarding/body-${id}.svg)`, WebkitMaskImage: `url(/onboarding/body-${id}.svg)` }} />
-)
-
 const CATEGORIES: { key: keyof Preferences; title: string; options: Option[] }[] = [
   {
     key: 'hair',
@@ -33,9 +28,9 @@ const CATEGORIES: { key: keyof Preferences; title: string; options: Option[] }[]
     key: 'body',
     title: 'Body type',
     options: [
-      { id: 'slim', label: 'Slim', visual: bodyArt('slim') },
-      { id: 'athletic', label: 'Athletic', visual: bodyArt('athletic') },
-      { id: 'curvy', label: 'Curvy', visual: bodyArt('curvy') },
+      { id: 'slim', label: 'Slim', visual: img('/onboarding/body-slim.webp') },
+      { id: 'athletic', label: 'Athletic', visual: img('/onboarding/body-athletic.webp') },
+      { id: 'curvy', label: 'Curvy', visual: img('/onboarding/body-curvy.webp') },
     ],
   },
   {
