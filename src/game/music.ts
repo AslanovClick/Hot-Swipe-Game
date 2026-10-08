@@ -79,6 +79,14 @@ if (import.meta.env.DEV) {
   (window as unknown as Record<string, unknown>).__music = () => ({ state: ctx?.state, gain: gain?.gain.value, started })
 }
 
+// Dev: a hot reload of this module would orphan a playing context that nothing can stop any more
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    listen(false)
+    ctx?.close().catch(() => {})
+  })
+}
+
 export function useMusic(enabled: boolean) {
   useEffect(() => {
     wanted = enabled
