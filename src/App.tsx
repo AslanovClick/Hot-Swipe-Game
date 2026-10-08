@@ -10,12 +10,23 @@ import { describePreferences, EMPTY_PREFERENCES, Onboarding, sanitizePreferences
 import { ResultCard } from './components/ResultCard'
 import { RulesSheet } from './components/RulesSheet'
 import { StatsSheet } from './components/StatsSheet'
+import { useMusic } from './game/music'
 import { hasPreferences, setLineupPreferences } from './game/scenes'
 import { useGame } from './game/useGame'
 
 type Sheet = 'menu' | 'rules' | 'ambassadors' | 'history' | 'stats' | null
 
 const ONBOARDING_KEY = 'hotswipe.preferences.v2'
+const SETTINGS_KEY = 'hotswipe.settings'
+const DEFAULT_SETTINGS: Prefs = { audio: true, animation: true, quickBet: false }
+
+function loadSettings(): Prefs {
+  try {
+    return { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') }
+  } catch {
+    return DEFAULT_SETTINGS
+  }
+}
 
 function loadPreferences(): Preferences | null {
   let prefs: Preferences | null = null
@@ -38,8 +49,14 @@ export default function App() {
   const { phase, outcome } = state
   const close = () => setSheet(null)
 
-  // Menu switches are clickable but don't drive any behavior yet
-  const [prefs, setPrefs] = useState<Prefs>({ audio: true, animation: true, quickBet: false })
+  // Menu switches: background music, motion, and quick bet (a tap on a color places the bet at once)
+  const [prefs, setPrefs] = useState<Prefs>(loadSettings)
+  const setPref = (key: keyof Prefs, value: boolean) => setPrefs(p => {
+    const next = { ...p, [key]: value }
+    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(next)) } catch { /* storage unavailable */ }
+    return next
+  })
+  useMusic(prefs.audio)
 
   // New preferences take over the current scene if it hasn't been played yet (fresh timer),
   // otherwise from the next round on; scenes already shown never change
@@ -55,7 +72,7 @@ export default function App() {
   const delta = phase === 'result' || (phase === 'advancing' && outcome) ? outcome?.payout ?? null : null
 
   return (
-    <div className="app">
+    <div className={`app ${prefs.animation ? '' : 'is-still'}`}>
       <main className="phone">
         <section className={`stage ${phase === 'reveal' ? 'is-revealing' : ''}`}>
           <Feed
@@ -77,7 +94,7 @@ export default function App() {
           <div className={`dock ${phase === 'reveal' ? 'is-compact' : ''}`}>
             <BetPanel
               state={state}
-              onPick={color => dispatch({ type: 'pick', color })}
+              onPick={color => dispatch({ type: 'pick', color, quick: prefs.quickBet })}
               onStake={stake => dispatch({ type: 'setStake', stake })}
               onHighRisk={on => dispatch({ type: 'setHighRisk', on })}
               onAutoBet={on => dispatch({ type: 'setAutoBet', on })}
@@ -101,7 +118,7 @@ export default function App() {
           <Menu
             balance={state.balance}
             prefs={prefs}
-            onPref={(key, value) => setPrefs(p => ({ ...p, [key]: value }))}
+            onPref={setPref}
             onRules={() => setSheet('rules')}
             onHistory={() => setSheet('history')}
             onStats={() => setSheet('stats')}

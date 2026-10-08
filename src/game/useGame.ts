@@ -37,7 +37,7 @@ export interface GameState {
 
 type Action =
   | { type: 'tick'; dt: number }
-  | { type: 'pick'; color: Color }
+  | { type: 'pick'; color: Color; quick?: boolean }
   | { type: 'setStake'; stake: number }
   | { type: 'next' }
   | { type: 'resetBalance' }
@@ -124,8 +124,10 @@ function reducer(s: GameState, a: Action): GameState {
       return next
     }
     case 'pick':
-      // Switchable until the timer locks it
       if (s.phase !== 'betting') return s
+      // Quick bet: the tapped color is placed right away instead of waiting for the timer
+      if (a.quick) return lockIn({ ...s, pick: a.color })
+      // Switchable until the timer locks it
       return { ...s, pick: s.pick === a.color ? null : a.color }
     case 'setStake':
       if (s.phase === 'reveal') return s

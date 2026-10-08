@@ -48,9 +48,9 @@ export function Menu({
         </div>
 
         <div className="glass menu-group">
-          <ToggleItem icon={<SpeakerIcon />} label="Audio" checked={prefs.audio} onChange={v => onPref('audio', v)} />
-          <ToggleItem icon={<SparkleIcon />} label="Animation" checked={prefs.animation} onChange={v => onPref('animation', v)} />
-          <ToggleItem icon={<BoltIcon />} label="Quick bet" checked={prefs.quickBet} onChange={v => onPref('quickBet', v)} />
+          <ToggleItem icon={<SpeakerIcon />} label="Audio" hint="Background music" checked={prefs.audio} onChange={v => onPref('audio', v)} />
+          <ToggleItem icon={<SparkleIcon />} label="Animation" hint="Effects and transitions" checked={prefs.animation} onChange={v => onPref('animation', v)} />
+          <ToggleItem icon={<BoltIcon />} label="Quick bet" hint="Tap a color to bet at once" checked={prefs.quickBet} onChange={v => onPref('quickBet', v)} />
         </div>
 
         <div className="glass menu-group">
@@ -77,11 +77,16 @@ function LinkItem({ icon, label, hint, onClick }: { icon: ReactNode; label: stri
   )
 }
 
-function ToggleItem({ icon, label, checked, onChange }: { icon: ReactNode; label: string; checked: boolean; onChange: (v: boolean) => void }) {
+interface ToggleItemProps { icon: ReactNode; label: string; hint: string; checked: boolean; onChange: (v: boolean) => void }
+
+function ToggleItem({ icon, label, hint, checked, onChange }: ToggleItemProps) {
   return (
     <div className="menu-item">
       <span className="menu-icon">{icon}</span>
-      <span>{label}</span>
+      <span className="menu-label">
+        {label}
+        <small>{hint}</small>
+      </span>
       <span className="menu-toggle"><Toggle checked={checked} onChange={onChange} /></span>
     </div>
   )
