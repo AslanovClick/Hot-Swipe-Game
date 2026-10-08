@@ -197,3 +197,9 @@ export const ClockIcon = ({ size = 16 }: P) => (
     <path d="M12 9v4l2.5 2M9.5 2.5h5" />
   </Icon>
 )
+
+export const ShuffleIcon = ({ size = 16 }: P) => (
+  <Icon size={size}>
+    <path d="M16.5 3.5h4v4M3.5 20.5l17-17M20.5 16.5v4h-4M14.5 14.5l6 6M3.5 3.5l5 5" />
+  </Icon>
+)

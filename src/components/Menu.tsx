@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
 import { formatCoins } from './Header'
 import {
-  BoltIcon, BookIcon, ChevronRightIcon, HelpIcon, HistoryIcon, SlidersIcon, SparkleIcon, SpeakerIcon, StatsIcon, WalletIcon,
+  BoltIcon, BookIcon, ChevronRightIcon, HelpIcon, HistoryIcon, ShuffleIcon, SlidersIcon, SparkleIcon, SpeakerIcon, StatsIcon,
+  WalletIcon,
 } from './icons'
 import { Toggle } from './Toggle'
 
@@ -17,13 +18,18 @@ interface Props {
   onPref: (key: keyof Prefs, value: boolean) => void
   onRules: () => void
   onHistory: () => void
+  // Summary of the saved preferences, null when the feed is fully random
+  preferences: string | null
   onPreferences: () => void
+  onResetPreferences: () => void
   onStats: () => void
   onReset: () => void
   onClose: () => void
 }
 
-export function Menu({ balance, prefs, onPref, onRules, onHistory, onPreferences, onStats, onReset, onClose }: Props) {
+export function Menu({
+  balance, prefs, onPref, onRules, onHistory, preferences, onPreferences, onResetPreferences, onStats, onReset, onClose,
+}: Props) {
   return (
     <div className="sheet-backdrop" onClick={onClose}>
       <nav className="sheet menu" onClick={e => e.stopPropagation()} aria-label="Menu">
@@ -39,7 +45,13 @@ export function Menu({ balance, prefs, onPref, onRules, onHistory, onPreferences
         <div className="glass menu-group">
           <LinkItem icon={<StatsIcon />} label="Statistics" onClick={onStats} />
           <LinkItem icon={<BookIcon />} label="Game rules" onClick={onRules} />
-          <LinkItem icon={<SlidersIcon />} label="Preferences" onClick={onPreferences} />
+          <LinkItem icon={<SlidersIcon />} label="Preferences" hint={preferences ?? 'Random feed'} onClick={onPreferences} />
+          {preferences && (
+            <button className="menu-item menu-item-reset" onClick={onResetPreferences}>
+              <span className="menu-icon"><ShuffleIcon /></span>
+              <span>Reset to random</span>
+            </button>
+          )}
         </div>
 
         <div className="glass menu-group">
@@ -59,11 +71,14 @@ export function Menu({ balance, prefs, onPref, onRules, onHistory, onPreferences
   )
 }
 
-function LinkItem({ icon, label, onClick }: { icon: ReactNode; label: string; onClick: () => void }) {
+function LinkItem({ icon, label, hint, onClick }: { icon: ReactNode; label: string; hint?: string; onClick: () => void }) {
   return (
     <button className="menu-item" onClick={onClick}>
       <span className="menu-icon">{icon}</span>
-      <span>{label}</span>
+      <span className="menu-label">
+        {label}
+        {hint && <small>{hint}</small>}
+      </span>
       <span className="menu-chevron"><ChevronRightIcon /></span>
     </button>
   )

@@ -45,6 +45,7 @@ type Action =
   | { type: 'setHighRisk'; on: boolean }
   | { type: 'setAutoBet'; on: boolean }
   | { type: 'revealEnded' }
+  | { type: 'restartBetting' }
 
 const HISTORY_LIMIT = 50
 
@@ -142,6 +143,9 @@ function reducer(s: GameState, a: Action): GameState {
       const next = { ...s, autoBet: a.on }
       return a.on && s.phase === 'betting' && s.pick === null ? { ...next, pick: autoPick(next) } : next
     }
+    case 'restartBetting':
+      // The current scene was swapped (new preferences) before the round was played: fresh timer
+      return s.phase === 'betting' ? { ...s, elapsed: 0, pick: autoPick(s) } : s
     case 'setAmbassador':
       // Switch right away if the round hasn't been played yet; otherwise from the next round
       return s.phase === 'betting'

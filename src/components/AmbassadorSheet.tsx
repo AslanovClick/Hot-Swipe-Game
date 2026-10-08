@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { AMBASSADOR_COST_MULT } from '../game/config'
-import { MODELS, type Model } from '../game/scenes'
+import { AMBASSADORS, type Model } from '../game/scenes'
 import { formatCoins } from './Header'
 import { CheckIcon, CloseIcon, Flag, HeartIcon, LockIcon, RepeatIcon, VerifiedIcon } from './icons'
 
@@ -14,9 +14,9 @@ interface Props {
 const COUNTRY: Record<Model['country'], string> = { es: 'Spain', us: 'USA', gb: 'UK' }
 
 export function AmbassadorSheet({ current, stake, onSelect, onClose }: Props) {
-  const [focus, setFocus] = useState<string | null>(current ?? MODELS[0].id)
+  const [focus, setFocus] = useState<string | null>(current ?? AMBASSADORS[0].id)
   const [confirm, setConfirm] = useState<Model | null>(null)
-  const focused = MODELS.find(m => m.id === focus) ?? null
+  const focused = AMBASSADORS.find(m => m.id === focus) ?? null
 
   // The cost notice is shown when the mode is switched on; switching between ambassadors skips it
   const play = (m: Model) => (current ? onSelect(m.id) : setConfirm(m))
@@ -78,7 +78,7 @@ export function AmbassadorSheet({ current, stake, onSelect, onClose }: Props) {
           <div className="amb-mode-note"><HeartIcon size={12} /> Ambassador mode · every round at bet ×{AMBASSADOR_COST_MULT}</div>
 
           <div className="amb-grid" role="radiogroup" aria-label="Ambassadors">
-            {MODELS.map((m, i) => {
+            {AMBASSADORS.map((m, i) => {
               const isFocus = m.id === focus
               const isCurrent = m.id === current
               return (

@@ -6,10 +6,11 @@ import { Header } from './components/Header'
 import { HistorySheet } from './components/HistorySheet'
 import { ShieldIcon } from './components/icons'
 import { Menu, type Prefs } from './components/Menu'
-import { EMPTY_PREFERENCES, Onboarding, sanitizePreferences, type Preferences } from './components/Onboarding'
+import { describePreferences, EMPTY_PREFERENCES, Onboarding, sanitizePreferences, type Preferences } from './components/Onboarding'
 import { ResultCard } from './components/ResultCard'
 import { RulesSheet } from './components/RulesSheet'
 import { StatsSheet } from './components/StatsSheet'
+import { hasPreferences, setLineupPreferences } from './game/scenes'
 import { useGame } from './game/useGame'
 
 type Sheet = 'menu' | 'rules' | 'ambassadors' | 'history' | 'stats' | null
@@ -17,12 +18,14 @@ type Sheet = 'menu' | 'rules' | 'ambassadors' | 'history' | 'stats' | null
 const ONBOARDING_KEY = 'hotswipe.preferences.v2'
 
 function loadPreferences(): Preferences | null {
+  let prefs: Preferences | null = null
   try {
     const raw = localStorage.getItem(ONBOARDING_KEY)
-    return raw ? sanitizePreferences(JSON.parse(raw)) : null
-  } catch {
-    return null
-  }
+    prefs = raw ? sanitizePreferences(JSON.parse(raw)) : null
+  } catch { /* storage unavailable */ }
+  // Saved preferences tune the feed from the very first round
+  setLineupPreferences(prefs, 0)
+  return prefs
 }
 
 export default function App() {
@@ -38,10 +41,15 @@ export default function App() {
   // Menu switches are clickable but don't drive any behavior yet
   const [prefs, setPrefs] = useState<Prefs>({ audio: true, animation: true, quickBet: false })
 
+  // New preferences take over the current scene if it hasn't been played yet (fresh timer),
+  // otherwise from the next round on; scenes already shown never change
   const savePreferences = (p: Preferences) => {
     setPreferences(p)
     setPrefsScreen(null)
     try { localStorage.setItem(ONBOARDING_KEY, JSON.stringify(p)) } catch { /* storage unavailable */ }
+    const now = phase === 'betting'
+    setLineupPreferences(p, now ? state.round : state.round + (phase === 'advancing' ? 2 : 1))
+    if (now && !state.ambassador) dispatch({ type: 'restartBetting' })
   }
 
   const delta = phase === 'result' || (phase === 'advancing' && outcome) ? outcome?.payout ?? null : null
@@ -97,7 +105,9 @@ export default function App() {
             onRules={() => setSheet('rules')}
             onHistory={() => setSheet('history')}
             onStats={() => setSheet('stats')}
+            preferences={hasPreferences(preferences) ? describePreferences(preferences) : null}
             onPreferences={() => { close(); setPrefsScreen('edit') }}
+            onResetPreferences={() => savePreferences(EMPTY_PREFERENCES)}
             onReset={() => dispatch({ type: 'resetBalance' })}
             onClose={close}
           />

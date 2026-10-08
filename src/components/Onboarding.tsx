@@ -1,12 +1,9 @@
 import { useState, type ReactNode } from 'react'
+import type { LookPrefs } from '../game/scenes'
 import { CheckIcon, CloseIcon, HeartIcon } from './icons'
 
-// One pick per category; collected for later personalization, doesn't affect the feed yet
-export interface Preferences {
-  hair: string | null
-  body: string | null
-  ethnicity: string | null
-}
+// One pick per category; tunes which models the feed shows (see the lineup in game/scenes)
+export type Preferences = LookPrefs
 
 export const EMPTY_PREFERENCES: Preferences = { hair: null, body: null, ethnicity: null }
 
@@ -44,6 +41,9 @@ const CATEGORIES: { key: keyof Preferences; title: string; options: Option[] }[]
   },
 ]
 
+export const describePreferences = (p: Preferences | null) =>
+  CATEGORIES.map(c => c.options.find(o => o.id === p?.[c.key])?.label).filter(Boolean).join(' · ')
+
 // Drops answers that are no longer offered (e.g. saved before an option was removed)
 export function sanitizePreferences(p: Partial<Preferences> | null): Preferences {
   const out = { ...EMPTY_PREFERENCES }
@@ -56,7 +56,7 @@ export function sanitizePreferences(p: Partial<Preferences> | null): Preferences
 
 interface Props {
   initial: Preferences
-  // 'first' runs before the game (can be skipped); 'edit' is opened from the menu
+  // 'first' runs before the game (skipping it keeps the feed fully random); 'edit' is opened from the menu
   mode: 'first' | 'edit'
   onDone: (prefs: Preferences) => void
   onClose: () => void
@@ -77,7 +77,7 @@ export function Onboarding({ initial, mode, onDone, onClose }: Props) {
       <div className="onb-top">
         <div className="onb-kicker"><HeartIcon size={14} /> Preferences</div>
         {mode === 'first'
-          ? <button className="onb-link" onClick={() => onDone(prefs)}>Skip</button>
+          ? <button className="onb-link" onClick={() => onDone(EMPTY_PREFERENCES)}>Skip</button>
           : <button className="sheet-x onb-close" onClick={onClose} aria-label="Close"><CloseIcon /></button>}
       </div>
 
