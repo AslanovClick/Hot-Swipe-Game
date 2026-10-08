@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { formatCoins } from './Header'
 import {
-  BoltIcon, BookIcon, ChevronRightIcon, HelpIcon, HistoryIcon, ShuffleIcon, SlidersIcon, SparkleIcon, SpeakerIcon, StatsIcon,
+  BoltIcon, BookIcon, ChevronRightIcon, HelpIcon, HistoryIcon, SlidersIcon, SparkleIcon, SpeakerIcon, StatsIcon,
   WalletIcon,
 } from './icons'
 import { Toggle } from './Toggle'
@@ -21,14 +21,13 @@ interface Props {
   // Summary of the saved preferences, null when the feed is fully random
   preferences: string | null
   onPreferences: () => void
-  onResetPreferences: () => void
   onStats: () => void
   onReset: () => void
   onClose: () => void
 }
 
 export function Menu({
-  balance, prefs, onPref, onRules, onHistory, preferences, onPreferences, onResetPreferences, onStats, onReset, onClose,
+  balance, prefs, onPref, onRules, onHistory, preferences, onPreferences, onStats, onReset, onClose,
 }: Props) {
   return (
     <div className="sheet-backdrop" onClick={onClose}>
@@ -46,12 +45,6 @@ export function Menu({
           <LinkItem icon={<StatsIcon />} label="Statistics" onClick={onStats} />
           <LinkItem icon={<BookIcon />} label="Game rules" onClick={onRules} />
           <LinkItem icon={<SlidersIcon />} label="Preferences" hint={preferences ?? 'Random feed'} onClick={onPreferences} />
-          {preferences && (
-            <button className="menu-item menu-item-reset" onClick={onResetPreferences}>
-              <span className="menu-icon"><ShuffleIcon /></span>
-              <span>Reset to random</span>
-            </button>
-          )}
         </div>
 
         <div className="glass menu-group">

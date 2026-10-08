@@ -10,6 +10,8 @@
   --accent-glow: rgba(240, 70, 255, 0.55);
   --cta: linear-gradient(135deg, #ff4fa6 0%, #f23cf8 50%, #8a4dff 100%);
   --cta-border: rgba(255, 180, 250, 0.5);
+  /* Same three stops as --cta, mixed into the panel color: opaque, so it stays clean on any background */
+  --cta-disabled: linear-gradient(135deg, #742a64 0%, #702380 50%, #4c2983 100%);
   --gold: #ffcb45;
   --win: #3ff0a6;
   --lose: #ff5a7a;
@@ -619,7 +621,12 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   transition: filter 200ms, box-shadow 200ms, transform 150ms;
 }
 .cta:not(:disabled):active { transform: scale(0.97); }
-.cta:disabled { filter: grayscale(0.7) brightness(0.55); box-shadow: none; }
+.cta:disabled {
+  background: var(--cta-disabled);
+  border-color: rgba(255, 180, 250, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.cta:disabled .cta-label { color: rgba(255, 255, 255, 0.55); }
 .cta-label {
   position: relative;
   z-index: 1;
@@ -812,6 +819,7 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 }
 .sheet-head-title { font-size: 16px; font-weight: 700; }
 .sheet-head .sheet-x { top: 0; right: 0; }
+.sheet-head .sheet-back { left: 0; right: auto; }
 .sheet-sub { margin-top: 3px; font-size: 13px; color: var(--text-dim); }
 
 .sheet-x {
@@ -854,7 +862,6 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.menu-item-reset { color: var(--text-dim); }
 .menu-close { margin-top: 6px; height: 52px; }
 .menu-chevron, .menu-toggle { margin-left: auto; display: flex; color: rgba(255, 255, 255, 0.45); }
 .menu-balance { display: flex; align-items: center; gap: 12px; padding: 4px 4px 6px; }
@@ -1053,14 +1060,15 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
 .amb-hero {
   position: relative;
-  height: 210px;
+  height: 220px;
   margin: 0 0 12px;
   border-radius: 22px;
   overflow: hidden;
   background: #2a1640;
   box-shadow: 0 10px 30px rgba(255, 63, 208, 0.22), inset 0 0 0 1px rgba(255, 120, 235, 0.3);
 }
-.amb-hero video { width: 100%; height: 100%; object-fit: cover; object-position: center 22%; }
+/* Faces sit in the top fifth of the clips: keep the crop at the top so the face is in frame */
+.amb-hero video { width: 100%; height: 100%; object-fit: cover; object-position: center 2%; }
 .amb-hero-shade {
   position: absolute;
   inset: 0;
@@ -1313,6 +1321,14 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
 .onb-actions { margin-top: auto; padding-top: 22px; }
 .onb-actions .cta { width: 100%; }
+.onb-reset {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin: 12px auto 0;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-dim);
+}
 
 @media (max-height: 700px) {
   .color-btn { height: 52px; }

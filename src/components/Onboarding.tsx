@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
-import type { LookPrefs } from '../game/scenes'
-import { CheckIcon, CloseIcon, HeartIcon } from './icons'
+import { hasPreferences, type LookPrefs } from '../game/scenes'
+import { CheckIcon, CloseIcon, HeartIcon, ShuffleIcon } from './icons'
 
 // One pick per category; tunes which models the feed shows (see the lineup in game/scenes)
 export type Preferences = LookPrefs
@@ -85,7 +85,8 @@ export function Onboarding({ initial, mode, onDone, onClose }: Props) {
       <p className="onb-hint">Pick one in each category — we'll tune the feed to you.</p>
 
       <div className="onb-progress" aria-label={`${picked} of ${CATEGORIES.length} chosen`}>
-        {CATEGORIES.map(c => <span key={c.key} className={prefs[c.key] ? 'is-done' : ''} />)}
+        {/* Fills left to right by how many are chosen, whichever categories they are */}
+        {CATEGORIES.map((c, i) => <span key={c.key} className={i < picked ? 'is-done' : ''} />)}
         <b>{picked}/{CATEGORIES.length}</b>
       </div>
 
@@ -120,6 +121,12 @@ export function Onboarding({ initial, mode, onDone, onClose }: Props) {
         <button className="cta" onClick={() => onDone(prefs)} disabled={!complete}>
           <span className="cta-label">{mode === 'first' ? 'Start playing' : 'Save preferences'}</span>
         </button>
+        {/* Clears the saved preferences and goes back to a fully random feed */}
+        {mode === 'edit' && hasPreferences(initial) && (
+          <button className="onb-reset" onClick={() => onDone(EMPTY_PREFERENCES)}>
+            <ShuffleIcon size={14} /> Reset to random feed
+          </button>
+        )}
       </div>
     </div>
   )

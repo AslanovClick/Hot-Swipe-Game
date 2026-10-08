@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { AMBASSADOR_COST_MULT } from '../game/config'
 import { AMBASSADORS, type Model } from '../game/scenes'
 import { formatCoins } from './Header'
-import { CheckIcon, CloseIcon, Flag, HeartIcon, LockIcon, RepeatIcon, VerifiedIcon } from './icons'
+import { CheckIcon, ChevronLeftIcon, CloseIcon, Flag, HeartIcon, LockIcon, RepeatIcon, VerifiedIcon } from './icons'
 
 interface Props {
   current: string | null
@@ -26,6 +26,9 @@ export function AmbassadorSheet({ current, stake, onSelect, onClose }: Props) {
       {confirm ? (
         <div key="confirm" className="sheet amb-confirm" onClick={e => e.stopPropagation()} role="dialog" aria-label="Play with ambassador">
           <div className="sheet-head">
+            <button className="sheet-x sheet-back" onClick={() => setConfirm(null)} aria-label="Back to ambassadors">
+              <ChevronLeftIcon />
+            </button>
             <span className="sheet-head-title">Ambassador mode</span>
             <button className="sheet-x" onClick={onClose} aria-label="Close"><CloseIcon /></button>
           </div>
@@ -68,7 +71,6 @@ export function AmbassadorSheet({ current, stake, onSelect, onClose }: Props) {
           <button className="cta amb-continue" onClick={() => onSelect(confirm.id)}>
             <span className="cta-label">Play with {confirm.name}</span>
           </button>
-          <button className="amb-cancel" onClick={() => setConfirm(null)}>Back</button>
         </div>
       ) : (
         <div key="list" className="sheet amb-sheet" onClick={e => e.stopPropagation()} role="dialog" aria-label="Our ambassadors">

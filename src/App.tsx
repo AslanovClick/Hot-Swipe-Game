@@ -107,7 +107,6 @@ export default function App() {
             onStats={() => setSheet('stats')}
             preferences={hasPreferences(preferences) ? describePreferences(preferences) : null}
             onPreferences={() => { close(); setPrefsScreen('edit') }}
-            onResetPreferences={() => savePreferences(EMPTY_PREFERENCES)}
             onReset={() => dispatch({ type: 'resetBalance' })}
             onClose={close}
           />

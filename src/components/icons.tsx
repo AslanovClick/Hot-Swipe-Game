@@ -86,6 +86,8 @@ export const LockIcon = ({ size = 20 }: P) => (
 
 export const CloseIcon = ({ size = 18 }: P) => <Icon size={size} stroke={2.4}><path d="M6 6l12 12M18 6L6 18" /></Icon>
 
+export const ChevronLeftIcon = ({ size = 18 }: P) => <Icon size={size} stroke={2.4}><path d="M15 6l-6 6 6 6" /></Icon>
+
 export const ChevronRightIcon = ({ size = 16 }: P) => <Icon size={size} stroke={2.4}><path d="M9 6l6 6-6 6" /></Icon>
 
 export const BookIcon = ({ size = 16 }: P) => (
