@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { AMBASSADOR_COST_MULT } from '../game/config'
-import { AMBASSADORS, type Model } from '../game/scenes'
+import { AMBASSADORS, COUNTRY_NAME, type Model } from '../game/scenes'
 import { formatCoins } from './Header'
 import { CheckIcon, ChevronLeftIcon, CloseIcon, Flag, HeartIcon, LockIcon, RepeatIcon, VerifiedIcon } from './icons'
 
@@ -10,8 +10,6 @@ interface Props {
   onSelect: (id: string | null) => void
   onClose: () => void
 }
-
-const COUNTRY: Record<Model['country'], string> = { es: 'Spain', us: 'USA', gb: 'UK' }
 
 export function AmbassadorSheet({ current, stake, onSelect, onClose }: Props) {
   const [focus, setFocus] = useState<string | null>(current ?? AMBASSADORS[0].id)
@@ -34,12 +32,12 @@ export function AmbassadorSheet({ current, stake, onSelect, onClose }: Props) {
           </div>
 
           <div className="amb-hero">
-            <video src={confirm.poster} muted playsInline preload="metadata" />
+            <video src={confirm.poster} muted playsInline preload="metadata" style={{ objectPosition: `center ${confirm.heroY}%` }} />
             <span className="amb-hero-shade" />
             <span className="amb-tile-official"><VerifiedIcon size={11} /> Official ambassador</span>
             <span className="amb-hero-info">
               <b>{confirm.name}, {confirm.age}</b>
-              <span><Flag code={confirm.country} size={16} /> {COUNTRY[confirm.country]}</span>
+              <span><Flag code={confirm.country} size={16} /> {COUNTRY_NAME[confirm.country]}</span>
             </span>
           </div>
 
@@ -97,7 +95,7 @@ export function AmbassadorSheet({ current, stake, onSelect, onClose }: Props) {
                   <span className="amb-tile-official"><VerifiedIcon size={11} /> Official</span>
                   <span className="amb-tile-info">
                     <b>{m.name}, {m.age}</b>
-                    <span><Flag code={m.country} size={14} /> {COUNTRY[m.country]}</span>
+                    <span><Flag code={m.country} size={14} /> {COUNTRY_NAME[m.country]}</span>
                   </span>
                   {isCurrent && <span className="amb-tile-now">Now playing</span>}
                   {isFocus && <span className="amb-tile-check"><CheckIcon size={11} /></span>}

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import type { Country } from '../game/scenes'
 
 // All UI icons share one outline style: 24×24 grid, currentColor stroke, round caps/joins.
 function Icon({ size = 20, stroke = 2, children }: { size?: number; stroke?: number; children: ReactNode }) {
@@ -151,7 +152,7 @@ export const LayersIcon = ({ size = 18 }: P) => (
 )
 
 // Country flags as SVG (emoji flags don't render on Windows)
-export const Flag = ({ code, size = 18 }: { code: 'es' | 'us' | 'gb'; size?: number }) => {
+export const Flag = ({ code, size = 18 }: { code: Country; size?: number }) => {
   const h = Math.round(size * 0.7)
   return (
     <svg className="flag" width={size} height={h} viewBox="0 0 20 14" aria-hidden>
@@ -179,6 +180,40 @@ export const Flag = ({ code, size = 18 }: { code: 'es' | 'us' | 'gb'; size?: num
             <path d="M0 0L20 14M20 0L0 14" stroke="#c8102e" strokeWidth="1.2" />
             <path d="M10 0v14M0 7h20" stroke="#fff" strokeWidth="4" />
             <path d="M10 0v14M0 7h20" stroke="#c8102e" strokeWidth="2.2" />
+          </>
+        )}
+        {code === 'ae' && (
+          <>
+            <rect width="20" height="14" fill="#fff" />
+            <rect width="20" height="4.67" fill="#00732f" />
+            <rect y="9.33" width="20" height="4.67" fill="#000" />
+            <rect width="5" height="14" fill="#ff0000" />
+          </>
+        )}
+        {code === 'jp' && (
+          <>
+            <rect width="20" height="14" fill="#fff" />
+            <circle cx="10" cy="7" r="4.2" fill="#bc002d" />
+          </>
+        )}
+        {code === 'kr' && (
+          <>
+            <rect width="20" height="14" fill="#fff" />
+            <circle cx="10" cy="7" r="3.4" fill="#0047a0" />
+            <path d="M6.6 7a3.4 3.4 0 0 1 6.8 0a1.7 1.7 0 0 1-3.4 0a1.7 1.7 0 0 0-3.4 0z" fill="#cd2e3a" />
+            {/* Trigrams, simplified to three bars per corner */}
+            {[[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([dx, dy]) => (
+              <g key={`${dx}${dy}`} transform={`translate(${10 + dx * 6.4} ${7 + dy * 4.3}) rotate(${dx * dy * 56})`} fill="#000">
+                {[-1.1, 0, 1.1].map(y => <rect key={y} x="-1.3" y={y - 0.35} width="2.6" height="0.7" />)}
+              </g>
+            ))}
+          </>
+        )}
+        {code === 'th' && (
+          <>
+            <rect width="20" height="14" fill="#a51931" />
+            <rect y="2.33" width="20" height="9.34" fill="#f4f5f8" />
+            <rect y="4.67" width="20" height="4.66" fill="#2d2a4a" />
           </>
         )}
       </g>

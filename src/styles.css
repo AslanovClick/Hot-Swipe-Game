@@ -1068,8 +1068,8 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   background: #2a1640;
   box-shadow: 0 10px 30px rgba(255, 63, 208, 0.22), inset 0 0 0 1px rgba(255, 120, 235, 0.3);
 }
-/* Faces sit in the top fifth of the clips: keep the crop at the top so the face is in frame */
-.amb-hero video { width: 100%; height: 100%; object-fit: cover; object-position: center 2%; }
+/* Vertical crop comes from the model (heroY): faces sit near the top of the clips */
+.amb-hero video { width: 100%; height: 100%; object-fit: cover; }
 .amb-hero-shade {
   position: absolute;
   inset: 0;

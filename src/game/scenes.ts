@@ -1,6 +1,10 @@
 import { COLORS, modeFor, resultWeights, type Color } from './config'
 
-export type Country = 'es' | 'us' | 'gb'
+export type Country = 'es' | 'us' | 'gb' | 'ae' | 'jp' | 'kr' | 'th'
+
+export const COUNTRY_NAME: Record<Country, string> = {
+  es: 'Spain', us: 'USA', gb: 'UK', ae: 'UAE', jp: 'Japan', kr: 'South Korea', th: 'Thailand',
+}
 
 // Looks the feed is tuned by; the same ids the preferences screen offers
 export type Ethnicity = 'white' | 'asian' | 'african'
@@ -30,11 +34,13 @@ export interface Model {
   reveal: Record<Color, string>
   // Still frame for cards (media fragment: first second of the idle loop)
   poster: string
+  // Vertical crop (object-position %) for the wide ambassador photo, so the face stays in frame
+  heroY: number
 }
 
 const model = (
   [ethnicity, hair, body]: [Ethnicity, Hair, Body],
-  name: string, age: number, city: string, country: Country, ambassador = false,
+  name: string, age: number, city: string, country: Country, ambassador = false, heroY = 2,
 ): Model => {
   const dir = `/models/${ethnicity}/${hair}-${body}`
   return {
@@ -48,19 +54,33 @@ const model = (
     idle: `${dir}/idle.mp4`,
     reveal: { black: `${dir}/black.mp4`, red: `${dir}/red.mp4`, white: `${dir}/white.mp4` },
     poster: `${dir}/idle.mp4#t=1`,
+    heroY,
   }
 }
 
+// Cities follow the scene where a city is visible (skyline, street, palms); indoor scenes are free picks.
+// Ambassadors come first, in the order the ambassador sheet lists them.
 export const MODELS: Model[] = [
-  model(['white', 'blonde', 'slim'], 'Sofia', 23, 'Barcelona, Spain', 'es', true),
+  model(['asian', 'blonde', 'curvy'], 'Yuna', 23, 'Busan, South Korea', 'kr', true, 12), // seated: face sits lower
   model(['white', 'brunette', 'curvy'], 'Bella', 24, 'Los Angeles, USA', 'us', true),
   model(['white', 'chestnut', 'athletic'], 'Ruby', 22, 'London, UK', 'gb', true),
+
+  model(['white', 'blonde', 'slim'], 'Sofia', 23, 'Barcelona, Spain', 'es'),
   model(['white', 'blonde', 'athletic'], 'Chloe', 22, 'Miami, USA', 'us'),
   model(['white', 'blonde', 'curvy'], 'Grace', 25, 'Manchester, UK', 'gb'),
-  model(['white', 'brunette', 'slim'], 'Lucia', 21, 'Madrid, Spain', 'es'),
+  model(['white', 'brunette', 'slim'], 'Layla', 21, 'Dubai, UAE', 'ae'), // high-rise skyline over the water
   model(['white', 'brunette', 'athletic'], 'Emma', 23, 'New York, USA', 'us'),
   model(['white', 'chestnut', 'slim'], 'Lily', 24, 'Brighton, UK', 'gb'),
   model(['white', 'chestnut', 'curvy'], 'Elena', 25, 'Valencia, Spain', 'es'),
+
+  model(['asian', 'blonde', 'slim'], 'Mai', 22, 'Bangkok, Thailand', 'th'),
+  model(['asian', 'blonde', 'athletic'], 'Yuki', 24, 'Tokyo, Japan', 'jp'),
+  model(['asian', 'brunette', 'slim'], 'Hana', 21, 'Osaka, Japan', 'jp'),
+  model(['asian', 'brunette', 'athletic'], 'Aiko', 25, 'Yokohama, Japan', 'jp'), // city street at night
+  model(['asian', 'brunette', 'curvy'], 'Lin', 24, 'Phuket, Thailand', 'th'),
+  model(['asian', 'chestnut', 'slim'], 'Jisoo', 22, 'Seoul, South Korea', 'kr'), // balcony over a skyline
+  model(['asian', 'chestnut', 'athletic'], 'Minji', 24, 'Incheon, South Korea', 'kr'),
+  model(['asian', 'chestnut', 'curvy'], 'Leah', 25, 'San Diego, USA', 'us'), // tennis court with palms
 ]
 
 export const AMBASSADORS = MODELS.filter(m => m.ambassador)
