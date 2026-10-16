@@ -116,7 +116,7 @@ export default function App() {
           {!firstRun && <SceneHud state={state} />}
 
           {outcome && (phase === 'result' || phase === 'advancing') && (
-            <ResultCard key={state.round} outcome={outcome} leaving={phase === 'advancing'} />
+            <ResultCard key={state.round} outcome={outcome} leaving={phase === 'advancing'} animate={prefs.animation} />
           )}
 
           <div className={`dock ${phase === 'reveal' ? 'is-compact' : ''}`}>

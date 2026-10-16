@@ -1,23 +1,38 @@
+import { useEffect, useState } from 'react'
 import { COLOR_LABEL } from '../game/config'
 import type { Outcome } from '../game/useGame'
 import { formatCoins } from './Header'
 import { CoinIcon, HeartSolid } from './icons'
 
-export function ResultCard({ outcome, leaving }: { outcome: Outcome; leaving: boolean }) {
+// Win tiers by the multiplier that paid out: the favourite (black) is a plain win, red a big one,
+// white a mega one. Each tier adds intensity, not new colours.
+type Tier = 1 | 2 | 3
+const tierFor = (mult: number): Tier => (mult >= 5 ? 3 : mult >= 2 ? 2 : 1)
+const TITLE: Record<Tier, string> = { 1: 'You win!', 2: 'Big win!', 3: 'Mega win!' }
+const HEART_COUNT: Record<Tier, number> = { 1: 16, 2: 28, 3: 42 }
+
+export function ResultCard({ outcome, leaving, animate }: { outcome: Outcome; leaving: boolean; animate: boolean }) {
   const { bet, result, payout } = outcome
   const won = payout > 0
+  const tier = tierFor(bet.mult)
 
   return (
-    <div className={`result ${won ? 'is-win' : 'is-lose'} ${leaving ? 'is-leaving' : ''}`}>
+    <div className={`result ${won ? `is-win tier-${tier}` : 'is-lose'} ${leaving ? 'is-leaving' : ''}`}>
       <div className="result-glow" />
-      {won && <FloatingHearts />}
+      {won && <div className="win-flash" />}
+      {won && <FloatingHearts count={HEART_COUNT[tier]} />}
 
       <div className="result-body">
         {won ? (
           <>
-            <div className="win-title">You win!</div>
+            <div className="win-rays" aria-hidden />
+            <div className="win-ring" aria-hidden />
+            <Sparkles count={tier === 1 ? 6 : tier === 2 ? 9 : 12} />
+            <div className="win-title">{TITLE[tier]}</div>
             <div className="win-mult">x{bet.mult.toFixed(2)}</div>
-            <div className="win-payout glass"><CoinIcon size={20} /> +{formatCoins(payout)}</div>
+            <div className="win-payout glass">
+              <CoinIcon size={20} /> <CountUp value={payout} animate={animate} />
+            </div>
           </>
         ) : (
           <>
@@ -33,11 +48,59 @@ export function ResultCard({ outcome, leaving }: { outcome: Outcome; leaving: bo
   )
 }
 
+// Payout counts up from zero once the payout pill has risen in
+function CountUp({ value, animate }: { value: number; animate: boolean }) {
+  const [shown, setShown] = useState(animate ? 0 : value)
+  useEffect(() => {
+    if (!animate) return setShown(value)
+    const DELAY = 450, DURATION = 900
+    const start = performance.now()
+    let raf = 0
+    const step = (now: number) => {
+      const t = Math.min(1, Math.max(0, (now - start - DELAY) / DURATION))
+      setShown(value * (1 - Math.pow(1 - t, 3)))
+      if (t < 1) raf = requestAnimationFrame(step)
+    }
+    raf = requestAnimationFrame(step)
+    // Lands on the exact amount even where animation frames are throttled
+    const done = setTimeout(() => setShown(value), DELAY + DURATION + 50)
+    return () => { cancelAnimationFrame(raf); clearTimeout(done) }
+  }, [value, animate])
+  return <span className="win-payout-value">+{formatCoins(shown)}</span>
+}
+
+// Four-point glints twinkling around the title; positions are fixed so they frame the text
+const SPARKLES = [
+  { x: -8, y: 8, s: 18, d: 300 }, { x: 104, y: 14, s: 22, d: 520 }, { x: 12, y: -14, s: 12, d: 760 },
+  { x: 88, y: -10, s: 14, d: 420 }, { x: -14, y: 58, s: 12, d: 900 }, { x: 110, y: 62, s: 16, d: 640 },
+  { x: 30, y: -22, s: 10, d: 1100 }, { x: 70, y: -20, s: 12, d: 980 }, { x: 2, y: 90, s: 14, d: 1250 },
+  { x: 98, y: 92, s: 12, d: 1180 }, { x: 50, y: -28, s: 16, d: 820 }, { x: 118, y: 36, s: 10, d: 1400 },
+]
+
+function Sparkles({ count }: { count: number }) {
+  return (
+    <div className="sparkles" aria-hidden>
+      {SPARKLES.slice(0, count).map((p, i) => (
+        <svg
+          key={i}
+          className={`sparkle ${i % 3 === 0 ? 'is-gold' : ''}`}
+          width={p.s}
+          height={p.s}
+          viewBox="0 0 24 24"
+          style={{ left: `${p.x}%`, top: `${p.y}%`, animationDelay: `${p.d}ms` }}
+        >
+          <path d="M12 0c.9 6.3 5.7 11.1 12 12-6.3.9-11.1 5.7-12 12-.9-6.3-5.7-11.1-12-12C6.3 11.1 11.1 6.3 12 0z" fill="currentColor" />
+        </svg>
+      ))}
+    </div>
+  )
+}
+
 // Hearts are weighted to the screen edges so they frame the result instead of covering it.
 // Outer span rises (vertical only), inner span sways — two independent smooth motions.
 const rand = (i: number, n: number) => ((Math.sin(i * 12.9898 + n * 78.233) * 43758.5453) % 1 + 1) % 1
 
-const HEARTS = Array.from({ length: 30 }, (_, i) => {
+const HEARTS = Array.from({ length: 42 }, (_, i) => {
   const side = i % 5 === 4 ? 'mid' : i % 2 === 0 ? 'left' : 'right'
   const edge = rand(i, 1) * 20 // 0–20% in from the edge
   const left = side === 'left' ? edge : side === 'right' ? 100 - edge : 30 + rand(i, 1) * 40
@@ -57,10 +120,10 @@ const HEARTS = Array.from({ length: 30 }, (_, i) => {
   }
 })
 
-function FloatingHearts() {
+function FloatingHearts({ count }: { count: number }) {
   return (
     <div className="hearts" aria-hidden>
-      {HEARTS.map((h, i) => (
+      {HEARTS.slice(0, count).map((h, i) => (
         <span
           key={i}
           className={`heart tone-${h.tone} ${h.blur ? 'is-blur' : ''}`}

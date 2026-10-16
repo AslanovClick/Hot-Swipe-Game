@@ -661,10 +661,25 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 @keyframes fade-out { to { opacity: 0; } }
 
 .result-glow { position: absolute; inset: 0; animation: fade 500ms ease both; }
+.is-win { --glow: 0.38; --rays: 0.45; --flash: 0.45; }
+.is-win.tier-2 { --glow: 0.48; --rays: 0.7; --flash: 0.6; }
+.is-win.tier-3 { --glow: 0.58; --rays: 0.9; --flash: 0.75; }
 .is-win .result-glow {
   background:
-    radial-gradient(70% 35% at 50% 68%, rgba(255, 70, 190, 0.38), transparent 70%),
-    radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(225, 50, 200, 0.38));
+    radial-gradient(70% 35% at 50% 68%, rgb(255 70 190 / var(--glow)), transparent 70%),
+    radial-gradient(120% 90% at 50% 50%, transparent 55%, rgb(225 50 200 / var(--glow)));
+}
+/* Impact: a soft bloom of light where the title lands */
+.win-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(60% 40% at 50% 66%, rgba(255, 228, 248, 0.9), rgba(255, 120, 215, 0.35) 45%, transparent 75%);
+  opacity: 0;
+  animation: win-flash 800ms ease-out both;
+}
+@keyframes win-flash {
+  12% { opacity: var(--flash); }
+  100% { opacity: 0; }
 }
 .is-lose .result-glow {
   background: linear-gradient(to bottom, rgba(10, 6, 18, 0.05) 25%, rgba(10, 6, 18, 0.55) 60%, rgba(10, 6, 18, 0.85) 85%);
@@ -674,12 +689,69 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
 .result-body { position: relative; z-index: 1; text-align: center; }
 
+/* Slowly turning light rays behind the title, faded out towards the edges */
+.win-rays {
+  position: absolute;
+  left: 50%; top: 42%;
+  width: 560px; height: 560px;
+  margin: -280px 0 0 -280px;
+  z-index: -1;
+  pointer-events: none;
+  background: repeating-conic-gradient(from 0deg, rgba(255, 160, 230, 0.5) 0deg 5deg, transparent 5deg 18deg);
+  -webkit-mask-image: radial-gradient(circle, #000 0, rgba(0, 0, 0, 0.6) 22%, transparent 58%);
+  mask-image: radial-gradient(circle, #000 0, rgba(0, 0, 0, 0.6) 22%, transparent 58%);
+  opacity: 0;
+  animation: rays-in 700ms var(--ease) 100ms both, rays-spin 16s linear infinite;
+}
+.tier-3 .win-rays { background: repeating-conic-gradient(from 0deg, rgba(255, 214, 120, 0.5) 0deg 5deg, transparent 5deg 18deg); }
+@keyframes rays-in { from { opacity: 0; scale: 0.6; } to { opacity: var(--rays); scale: 1; } }
+@keyframes rays-spin { to { rotate: 360deg; } }
+
+/* Shockwave ring at the moment of the win (twice for a mega win) */
+.win-ring, .tier-3 .win-ring::after {
+  position: absolute;
+  left: 50%; top: 40%;
+  width: 150px; height: 150px;
+  margin: -75px 0 0 -75px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 190, 238, 0.9);
+  box-shadow: 0 0 18px rgba(255, 90, 205, 0.6), inset 0 0 14px rgba(255, 90, 205, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  animation: win-ring 900ms var(--ease) 120ms both;
+}
+.tier-3 .win-ring::after { content: ''; left: 0; top: 0; margin: 0; border-color: rgba(255, 220, 140, 0.9); animation-delay: 420ms; }
+@keyframes win-ring {
+  from { opacity: 1; transform: scale(0.3); }
+  to { opacity: 0; transform: scale(3); }
+}
+
+/* Glints around the title */
+.sparkles { position: absolute; inset: 0; pointer-events: none; }
+.sparkle {
+  position: absolute;
+  translate: -50% -50%;
+  color: #fff;
+  filter: drop-shadow(0 0 6px rgba(255, 140, 225, 0.9));
+  opacity: 0;
+  animation: twinkle 1.7s ease-in-out infinite both;
+}
+.sparkle.is-gold { color: #ffe08a; filter: drop-shadow(0 0 6px rgba(255, 200, 80, 0.9)); }
+@keyframes twinkle {
+  0% { opacity: 0; transform: scale(0) rotate(0deg); }
+  45% { opacity: 1; transform: scale(1) rotate(80deg); }
+  100% { opacity: 0; transform: scale(0) rotate(180deg); }
+}
+
 /* Win: stacked, layered display type with a pink extrusion */
 .win-title, .win-mult {
   font-weight: 800;
   text-transform: uppercase;
   line-height: 0.95;
-  background: linear-gradient(180deg, #ffffff 35%, #ffd0f3 60%, #ff7ad8 100%);
+  /* A light streak sweeps across once (first layer), over the pink-to-white fill */
+  background:
+    linear-gradient(105deg, transparent 38%, rgba(255, 250, 235, 0.95) 48%, transparent 58%) 160% 0 / 250% 100% no-repeat,
+    linear-gradient(180deg, #ffffff 35%, #ffd0f3 60%, #ff7ad8 100%);
   -webkit-background-clip: text; background-clip: text;
   color: transparent;
   filter:
@@ -687,14 +759,23 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
     drop-shadow(0 5px 0 #6c0a63)
     drop-shadow(0 0 22px rgba(255, 80, 200, 0.85));
 }
-.win-title { font-size: 50px; letter-spacing: 1px; animation: slam 600ms var(--spring) both; }
+.win-title { font-size: 50px; letter-spacing: 1px; animation: slam 600ms var(--spring) both, shine 1100ms ease-in-out 650ms both; }
+.tier-3 .win-title, .tier-3 .win-mult {
+  filter:
+    drop-shadow(0 3px 0 #d0189e)
+    drop-shadow(0 5px 0 #6c0a63)
+    drop-shadow(0 0 22px rgba(255, 80, 200, 0.85))
+    drop-shadow(0 0 30px rgba(255, 200, 90, 0.45));
+}
+@keyframes shine { from { background-position: 160% 0, 0 0; } to { background-position: -60% 0, 0 0; } }
 .win-mult {
   margin-top: 6px;
   text-transform: none;
   font-size: 84px;
   letter-spacing: -1px;
-  animation: slam 700ms var(--spring) 180ms both, throb 1.4s ease-in-out 900ms infinite;
+  animation: slam 700ms var(--spring) 180ms both, shine 1100ms ease-in-out 850ms both, throb 1.4s ease-in-out 900ms infinite;
 }
+.tier-3 .win-mult { font-size: 96px; }
 @keyframes slam {
   0% { opacity: 0; transform: scale(2.2); }
   60% { opacity: 1; }
@@ -710,8 +791,10 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   font-size: 19px;
   font-weight: 700;
   color: var(--gold);
-  animation: rise 500ms var(--ease) 500ms both;
+  animation: rise 500ms var(--ease) 350ms both;
 }
+.win-payout-value { font-variant-numeric: tabular-nums; }
+.tier-2 .win-payout, .tier-3 .win-payout { box-shadow: 0 0 0 1px rgba(255, 203, 69, 0.35), 0 0 22px rgba(255, 203, 69, 0.35); }
 
 .hearts { position: absolute; inset: 0; overflow: hidden; }
 .heart {
