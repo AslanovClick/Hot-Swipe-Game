@@ -64,9 +64,10 @@ const model = (
 export const MODELS: Model[] = [
   model(['asian', 'blonde', 'curvy'], 'Yuna', 23, 'Busan, South Korea', 'kr', true, 12), // seated: face sits lower
   model(['white', 'brunette', 'curvy'], 'Bella', 24, 'Los Angeles, USA', 'us', true),
-  model(['white', 'chestnut', 'athletic'], 'Ruby', 22, 'London, UK', 'gb', true),
+  model(['african', 'chestnut', 'athletic'], 'Esi', 23, 'Accra, Ghana', 'gh', true),
 
   model(['white', 'blonde', 'slim'], 'Sofia', 23, 'Barcelona, Spain', 'es'),
+  model(['white', 'chestnut', 'athletic'], 'Ruby', 22, 'London, UK', 'gb'),
   model(['white', 'blonde', 'athletic'], 'Chloe', 22, 'Miami, USA', 'us'),
   model(['white', 'blonde', 'curvy'], 'Grace', 25, 'Manchester, UK', 'gb'),
   model(['white', 'brunette', 'slim'], 'Layla', 21, 'Dubai, UAE', 'ae'), // high-rise skyline over the water
@@ -84,13 +85,12 @@ export const MODELS: Model[] = [
   model(['asian', 'chestnut', 'curvy'], 'Leah', 25, 'San Diego, USA', 'us'), // tennis court with palms
 
   model(['african', 'blonde', 'slim'], 'Amara', 22, 'Lagos, Nigeria', 'ng'),
-  model(['african', 'blonde', 'athletic'], 'Zuri', 23, 'Accra, Ghana', 'gh'),
+  model(['african', 'blonde', 'athletic'], 'Zuri', 23, 'Kumasi, Ghana', 'gh'),
   model(['african', 'blonde', 'curvy'], 'Nia', 25, 'Atlanta, USA', 'us'),
   model(['african', 'brunette', 'slim'], 'Imani', 21, 'Paris, France', 'fr'),
   model(['african', 'brunette', 'athletic'], 'Ayana', 24, 'Houston, USA', 'us'),
   model(['african', 'brunette', 'curvy'], 'Kemi', 24, 'Abuja, Nigeria', 'ng'),
   model(['african', 'chestnut', 'slim'], 'Ada', 22, 'London, UK', 'gb'),
-  model(['african', 'chestnut', 'athletic'], 'Esi', 23, 'Kumasi, Ghana', 'gh'),
   model(['african', 'chestnut', 'curvy'], 'Tia', 25, 'Chicago, USA', 'us'),
 ]
 
