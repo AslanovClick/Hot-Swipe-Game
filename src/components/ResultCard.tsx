@@ -4,31 +4,34 @@ import type { Outcome } from '../game/useGame'
 import { formatCoins } from './Header'
 import { CoinIcon, HeartSolid } from './icons'
 
-// Win tiers by the multiplier that paid out: the favourite (black) is a plain win, red a big one,
-// white a mega one. Each tier adds intensity, not new colours.
-type Tier = 1 | 2 | 3
-const tierFor = (mult: number): Tier => (mult >= 5 ? 3 : mult >= 2 ? 2 : 1)
-const TITLE: Record<Tier, string> = { 1: 'You win!', 2: 'Big win!', 3: 'Mega win!' }
-const HEART_COUNT: Record<Tier, number> = { 1: 16, 2: 28, 3: 42 }
+// Deterministic pseudo-random in [0, 1) for particle layouts
+const rand = (i: number, n: number) => ((Math.sin(i * 12.9898 + n * 78.233) * 43758.5453) % 1 + 1) % 1
 
 export function ResultCard({ outcome, leaving, animate }: { outcome: Outcome; leaving: boolean; animate: boolean }) {
   const { bet, result, payout } = outcome
   const won = payout > 0
-  const tier = tierFor(bet.mult)
 
   return (
-    <div className={`result ${won ? `is-win tier-${tier}` : 'is-lose'} ${leaving ? 'is-leaving' : ''}`}>
+    <div className={`result ${won ? 'is-win' : 'is-lose'} ${leaving ? 'is-leaving' : ''}`}>
       <div className="result-glow" />
       {won && <div className="win-flash" />}
-      {won && <FloatingHearts count={HEART_COUNT[tier]} />}
+      {won && <FloatingHearts />}
 
       <div className="result-body">
         {won ? (
           <>
             <div className="win-rays" aria-hidden />
             <div className="win-ring" aria-hidden />
-            <Sparkles count={tier === 1 ? 6 : tier === 2 ? 9 : 12} />
-            <div className="win-title">{TITLE[tier]}</div>
+            <Burst />
+            <Sparkles />
+            <div className="win-title" aria-label="You win!">
+              {/* Letters drop in one by one; the light streak then rolls across them as a wave */}
+              {[...'You win!'].map((ch, i) => (
+                <span key={i} className="win-letter" style={{ ['--i' as string]: i }} aria-hidden>
+                  {ch === ' ' ? ' ' : ch}
+                </span>
+              ))}
+            </div>
             <div className="win-mult">x{bet.mult.toFixed(2)}</div>
             <div className="win-payout glass">
               <CoinIcon size={20} /> <CountUp value={payout} animate={animate} />
@@ -44,6 +47,43 @@ export function ResultCard({ outcome, leaving, animate }: { outcome: Outcome; le
           </>
         )}
       </div>
+    </div>
+  )
+}
+
+// Coins and hearts thrown out from the title at the moment of the win, falling away as they fade
+const BURST = Array.from({ length: 18 }, (_, i) => {
+  const angle = (i / 18) * Math.PI * 2 + rand(i, 11) * 0.35
+  const dist = 110 + rand(i, 12) * 90
+  return {
+    dx: Math.cos(angle) * dist,
+    dy: Math.sin(angle) * dist * 0.75,
+    spin: (rand(i, 13) - 0.5) * 540,
+    size: 14 + rand(i, 14) * 12,
+    delay: rand(i, 15) * 120,
+    coin: i % 3 !== 0,
+  }
+})
+
+function Burst() {
+  return (
+    <div className="burst" aria-hidden>
+      {BURST.map((b, i) => (
+        <span
+          key={i}
+          className={`burst-bit ${b.coin ? 'is-coin' : 'is-heart'}`}
+          style={{
+            width: b.size,
+            height: b.size,
+            animationDelay: `${b.delay}ms`,
+            ['--dx' as string]: `${b.dx}px`,
+            ['--dy' as string]: `${b.dy}px`,
+            ['--spin' as string]: `${b.spin}deg`,
+          }}
+        >
+          {b.coin ? null : <HeartSolid size={Math.round(b.size)} />}
+        </span>
+      ))}
     </div>
   )
 }
@@ -77,10 +117,10 @@ const SPARKLES = [
   { x: 98, y: 92, s: 12, d: 1180 }, { x: 50, y: -28, s: 16, d: 820 }, { x: 118, y: 36, s: 10, d: 1400 },
 ]
 
-function Sparkles({ count }: { count: number }) {
+function Sparkles() {
   return (
     <div className="sparkles" aria-hidden>
-      {SPARKLES.slice(0, count).map((p, i) => (
+      {SPARKLES.map((p, i) => (
         <svg
           key={i}
           className={`sparkle ${i % 3 === 0 ? 'is-gold' : ''}`}
@@ -98,9 +138,8 @@ function Sparkles({ count }: { count: number }) {
 
 // Hearts are weighted to the screen edges so they frame the result instead of covering it.
 // Outer span rises (vertical only), inner span sways — two independent smooth motions.
-const rand = (i: number, n: number) => ((Math.sin(i * 12.9898 + n * 78.233) * 43758.5453) % 1 + 1) % 1
 
-const HEARTS = Array.from({ length: 42 }, (_, i) => {
+const HEARTS = Array.from({ length: 32 }, (_, i) => {
   const side = i % 5 === 4 ? 'mid' : i % 2 === 0 ? 'left' : 'right'
   const edge = rand(i, 1) * 20 // 0–20% in from the edge
   const left = side === 'left' ? edge : side === 'right' ? 100 - edge : 30 + rand(i, 1) * 40
@@ -120,10 +159,10 @@ const HEARTS = Array.from({ length: 42 }, (_, i) => {
   }
 })
 
-function FloatingHearts({ count }: { count: number }) {
+function FloatingHearts() {
   return (
     <div className="hearts" aria-hidden>
-      {HEARTS.slice(0, count).map((h, i) => (
+      {HEARTS.map((h, i) => (
         <span
           key={i}
           className={`heart tone-${h.tone} ${h.blur ? 'is-blur' : ''}`}

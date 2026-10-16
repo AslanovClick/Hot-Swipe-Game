@@ -661,13 +661,19 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 @keyframes fade-out { to { opacity: 0; } }
 
 .result-glow { position: absolute; inset: 0; animation: fade 500ms ease both; }
-.is-win { --glow: 0.38; --rays: 0.45; --flash: 0.45; }
-.is-win.tier-2 { --glow: 0.48; --rays: 0.7; --flash: 0.6; }
-.is-win.tier-3 { --glow: 0.58; --rays: 0.9; --flash: 0.75; }
 .is-win .result-glow {
   background:
-    radial-gradient(70% 35% at 50% 68%, rgb(255 70 190 / var(--glow)), transparent 70%),
-    radial-gradient(120% 90% at 50% 50%, transparent 55%, rgb(225 50 200 / var(--glow)));
+    radial-gradient(70% 35% at 50% 68%, rgba(255, 70, 190, 0.5), transparent 70%),
+    radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(225, 50, 200, 0.5));
+  /* Fades in, then the edges breathe once */
+  animation: glow-pulse 2000ms ease-in-out both;
+}
+@keyframes glow-pulse {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  45% { opacity: 0.65; }
+  70% { opacity: 1; }
+  100% { opacity: 0.85; }
 }
 /* Impact: a soft bloom of light where the title lands */
 .win-flash {
@@ -678,7 +684,7 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   animation: win-flash 800ms ease-out both;
 }
 @keyframes win-flash {
-  12% { opacity: var(--flash); }
+  12% { opacity: 0.65; }
   100% { opacity: 0; }
 }
 .is-lose .result-glow {
@@ -697,18 +703,22 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   margin: -280px 0 0 -280px;
   z-index: -1;
   pointer-events: none;
-  background: repeating-conic-gradient(from 0deg, rgba(255, 160, 230, 0.5) 0deg 5deg, transparent 5deg 18deg);
+  /* Pink rays with thin golden ones in between */
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 160, 230, 0.5) 0deg 5deg, transparent 5deg 11deg,
+    rgba(255, 214, 120, 0.45) 11deg 13deg, transparent 13deg 22deg
+  );
   -webkit-mask-image: radial-gradient(circle, #000 0, rgba(0, 0, 0, 0.6) 22%, transparent 58%);
   mask-image: radial-gradient(circle, #000 0, rgba(0, 0, 0, 0.6) 22%, transparent 58%);
   opacity: 0;
   animation: rays-in 700ms var(--ease) 100ms both, rays-spin 16s linear infinite;
 }
-.tier-3 .win-rays { background: repeating-conic-gradient(from 0deg, rgba(255, 214, 120, 0.5) 0deg 5deg, transparent 5deg 18deg); }
-@keyframes rays-in { from { opacity: 0; scale: 0.6; } to { opacity: var(--rays); scale: 1; } }
+@keyframes rays-in { from { opacity: 0; scale: 0.6; } to { opacity: 0.8; scale: 1; } }
 @keyframes rays-spin { to { rotate: 360deg; } }
 
-/* Shockwave ring at the moment of the win (twice for a mega win) */
-.win-ring, .tier-3 .win-ring::after {
+/* Double shockwave ring at the moment of the win */
+.win-ring, .win-ring::after {
   position: absolute;
   left: 50%; top: 40%;
   width: 150px; height: 150px;
@@ -720,7 +730,30 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   pointer-events: none;
   animation: win-ring 900ms var(--ease) 120ms both;
 }
-.tier-3 .win-ring::after { content: ''; left: 0; top: 0; margin: 0; border-color: rgba(255, 220, 140, 0.9); animation-delay: 420ms; }
+.win-ring::after { content: ''; left: 0; top: 0; margin: 0; border-color: rgba(255, 220, 140, 0.9); animation-delay: 420ms; }
+
+/* Coins and hearts thrown out from the title, dropping slightly as they fly */
+.burst { position: absolute; left: 50%; top: 38%; width: 0; height: 0; pointer-events: none; }
+.burst-bit {
+  position: absolute;
+  left: 0; top: 0;
+  translate: -50% -50%;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  animation: burst 1200ms cubic-bezier(0.15, 0.7, 0.3, 1) both;
+}
+.burst-bit.is-coin {
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff4c2, #ffcb45 45%, #c98a12 100%);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35), 0 0 10px rgba(255, 203, 69, 0.6);
+}
+.burst-bit.is-heart { color: #ff6fd0; filter: drop-shadow(0 0 6px rgba(255, 80, 200, 0.7)); }
+@keyframes burst {
+  0% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(0.3); }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), calc(var(--dy) + 70px)) rotate(var(--spin)) scale(1); }
+}
 @keyframes win-ring {
   from { opacity: 1; transform: scale(0.3); }
   to { opacity: 0; transform: scale(3); }
@@ -748,24 +781,31 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   font-weight: 800;
   text-transform: uppercase;
   line-height: 0.95;
-  /* A light streak sweeps across once (first layer), over the pink-to-white fill */
-  background:
-    linear-gradient(105deg, transparent 38%, rgba(255, 250, 235, 0.95) 48%, transparent 58%) 160% 0 / 250% 100% no-repeat,
-    linear-gradient(180deg, #ffffff 35%, #ffd0f3 60%, #ff7ad8 100%);
-  -webkit-background-clip: text; background-clip: text;
-  color: transparent;
   filter:
     drop-shadow(0 3px 0 #d0189e)
     drop-shadow(0 5px 0 #6c0a63)
     drop-shadow(0 0 22px rgba(255, 80, 200, 0.85));
 }
-.win-title { font-size: 50px; letter-spacing: 1px; animation: slam 600ms var(--spring) both, shine 1100ms ease-in-out 650ms both; }
-.tier-3 .win-title, .tier-3 .win-mult {
-  filter:
-    drop-shadow(0 3px 0 #d0189e)
-    drop-shadow(0 5px 0 #6c0a63)
-    drop-shadow(0 0 22px rgba(255, 80, 200, 0.85))
-    drop-shadow(0 0 30px rgba(255, 200, 90, 0.45));
+.win-letter, .win-mult {
+  /* A light streak sweeps across (first layer), over the pink-to-white fill */
+  background:
+    linear-gradient(105deg, transparent 38%, rgba(255, 250, 235, 0.95) 48%, transparent 58%) 160% 0 / 250% 100% no-repeat,
+    linear-gradient(180deg, #ffffff 35%, #ffd0f3 60%, #ff7ad8 100%);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+.win-title { font-size: 50px; letter-spacing: 1px; white-space: nowrap; }
+/* Letters drop in one after another, then the streak rolls across them as a wave */
+.win-letter {
+  display: inline-block;
+  animation:
+    letter-drop 650ms var(--spring) calc(var(--i) * 55ms) both,
+    shine 800ms ease-in-out calc(750ms + var(--i) * 60ms) both;
+}
+@keyframes letter-drop {
+  0% { opacity: 0; transform: translateY(-46px) scale(1.7) rotate(-8deg); }
+  55% { opacity: 1; }
+  100% { transform: none; }
 }
 @keyframes shine { from { background-position: 160% 0, 0 0; } to { background-position: -60% 0, 0 0; } }
 .win-mult {
@@ -773,9 +813,8 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   text-transform: none;
   font-size: 84px;
   letter-spacing: -1px;
-  animation: slam 700ms var(--spring) 180ms both, shine 1100ms ease-in-out 850ms both, throb 1.4s ease-in-out 900ms infinite;
+  animation: slam 700ms var(--spring) 380ms both, shine 1100ms ease-in-out 1250ms both, throb 1.4s ease-in-out 1100ms infinite;
 }
-.tier-3 .win-mult { font-size: 96px; }
 @keyframes slam {
   0% { opacity: 0; transform: scale(2.2); }
   60% { opacity: 1; }
@@ -791,10 +830,14 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   font-size: 19px;
   font-weight: 700;
   color: var(--gold);
-  animation: rise 500ms var(--ease) 350ms both;
+  box-shadow: 0 0 0 1px rgba(255, 203, 69, 0.35), 0 0 22px rgba(255, 203, 69, 0.35);
+  /* Rises in, then clicks when the count-up lands */
+  animation: rise 500ms var(--ease) 350ms both, payout-pop 450ms var(--spring) 1400ms both;
 }
 .win-payout-value { font-variant-numeric: tabular-nums; }
-.tier-2 .win-payout, .tier-3 .win-payout { box-shadow: 0 0 0 1px rgba(255, 203, 69, 0.35), 0 0 22px rgba(255, 203, 69, 0.35); }
+.win-payout .coin-icon { animation: coin-flip 700ms ease-in-out 1300ms both; }
+@keyframes payout-pop { 40% { scale: 1.14; } }
+@keyframes coin-flip { from { transform: rotateY(0); } to { transform: rotateY(360deg); } }
 
 .hearts { position: absolute; inset: 0; overflow: hidden; }
 .heart {
