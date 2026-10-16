@@ -102,7 +102,7 @@ export default function App() {
   return (
     <div className={`app ${prefs.animation ? '' : 'is-still'}`}>
       <main className="phone">
-        <section className={`stage ${phase === 'reveal' ? 'is-revealing' : ''} ${phase === 'result' && outcome && outcome.payout > 0 ? 'is-won' : ''}`}>
+        <section className={`stage ${phase === 'reveal' ? 'is-revealing' : ''}`}>
           {!firstRun && <Feed
             round={state.round}
             phase={phase}
