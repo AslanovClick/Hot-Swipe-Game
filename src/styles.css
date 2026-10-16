@@ -89,9 +89,19 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
 .stage { position: absolute; inset: 0; overflow: hidden; }
 
-.feed { position: absolute; inset: 0; touch-action: none; transition: transform 700ms var(--ease); }
-/* On a win the scene slowly moves in a little closer, and eases back as the next one slides in */
-.stage.is-won .feed { transform: scale(1.05); transition: transform 2400ms var(--ease); }
+.feed {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+  /* Own GPU layer, scaled as a whole: no per-frame re-raster or pixel snapping while zooming */
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0) scale(1);
+  transition: transform 700ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* On a win the scene drifts a little closer at an even pace for the whole result screen,
+   then eases back as the next one slides in */
+.stage.is-won .feed { transform: translateZ(0) scale(1.05); transition: transform 2600ms cubic-bezier(0.3, 0, 0.5, 1); }
 
 .slide {
   position: absolute;
@@ -803,7 +813,14 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   -webkit-background-clip: text; background-clip: text;
   color: transparent;
 }
-.win-title { font-size: 54px; letter-spacing: 1px; white-space: nowrap; }
+.win-title {
+  font-size: 54px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  /* Gentle breathing once the letters have landed: half the multiplier's pulse */
+  animation: throb-soft 1.4s ease-in-out 1150ms infinite;
+}
+@keyframes throb-soft { 50% { scale: 1.025; } }
 /* Letters drop in one after another, then the streak rolls across them as a wave */
 .win-letter {
   display: inline-block;
