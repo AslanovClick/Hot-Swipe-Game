@@ -89,14 +89,9 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
 .stage { position: absolute; inset: 0; overflow: hidden; }
 
-.feed { position: absolute; inset: 0; touch-action: none; }
-/* Win impact: the scene punches in towards the viewer and settles a touch closer */
-.stage.is-won .feed { animation: scene-punch 700ms var(--ease) both; }
-@keyframes scene-punch {
-  0% { transform: scale(1); }
-  25% { transform: scale(1.045); }
-  100% { transform: scale(1.02); }
-}
+.feed { position: absolute; inset: 0; touch-action: none; transition: transform 700ms var(--ease); }
+/* On a win the scene slowly moves in a little closer, and eases back as the next one slides in */
+.stage.is-won .feed { transform: scale(1.05); transition: transform 2400ms var(--ease); }
 
 .slide {
   position: absolute;
@@ -771,27 +766,6 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 @keyframes win-ring {
   from { opacity: 1; transform: scale(0.3); }
   to { opacity: 0; transform: scale(3); }
-}
-
-/* Confetti drifting down over the scene */
-.confetti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-.confetti-bit {
-  position: absolute;
-  top: -20px;
-  border-radius: 2px;
-  opacity: 0;
-  animation-name: confetti-fall;
-  animation-timing-function: cubic-bezier(0.3, 0.5, 0.6, 1);
-  animation-fill-mode: both;
-}
-.confetti-bit.tone-pink { background: linear-gradient(135deg, #ff8ad8, #f23cf8); }
-.confetti-bit.tone-white { background: linear-gradient(135deg, #ffffff, #ffd6f3); }
-.confetti-bit.tone-gold { background: linear-gradient(135deg, #fff1b8, #ffcb45); }
-@keyframes confetti-fall {
-  0% { opacity: 0; transform: translate(0, 0) rotate(0deg) rotateY(0deg); }
-  10% { opacity: 1; }
-  85% { opacity: 1; }
-  100% { opacity: 0; transform: translate(var(--drift), 70vh) rotate(var(--spin)) rotateY(540deg); }
 }
 
 /* Glints around the title */

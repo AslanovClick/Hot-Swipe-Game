@@ -16,7 +16,6 @@ export function ResultCard({ outcome, leaving, animate }: { outcome: Outcome; le
       <div className="result-glow" />
       {won && <div className="win-flash" />}
       {won && <FloatingHearts />}
-      {won && <Confetti />}
 
       <div className="result-body">
         {won ? (
@@ -86,40 +85,6 @@ function Burst() {
         >
           {b.coin ? null : <HeartSolid size={Math.round(b.size)} />}
         </span>
-      ))}
-    </div>
-  )
-}
-
-// Soft confetti drifting down from the top: pink, white and gold flakes that tumble as they fall
-const CONFETTI = Array.from({ length: 26 }, (_, i) => ({
-  left: 4 + rand(i, 21) * 92,
-  delay: rand(i, 22) * 900,
-  duration: 1800 + rand(i, 23) * 900,
-  drift: (rand(i, 24) - 0.5) * 60,
-  spin: 360 + rand(i, 25) * 540,
-  w: 5 + rand(i, 26) * 4,
-  h: 9 + rand(i, 27) * 6,
-  tone: ['pink', 'white', 'gold'][i % 3],
-}))
-
-function Confetti() {
-  return (
-    <div className="confetti" aria-hidden>
-      {CONFETTI.map((c, i) => (
-        <span
-          key={i}
-          className={`confetti-bit tone-${c.tone}`}
-          style={{
-            left: `${c.left}%`,
-            width: c.w,
-            height: c.h,
-            animationDelay: `${c.delay}ms`,
-            animationDuration: `${c.duration}ms`,
-            ['--drift' as string]: `${c.drift}px`,
-            ['--spin' as string]: `${c.spin}deg`,
-          }}
-        />
       ))}
     </div>
   )
