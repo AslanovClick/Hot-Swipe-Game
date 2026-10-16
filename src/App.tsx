@@ -45,6 +45,9 @@ export default function App() {
   const [preferences, setPreferences] = useState<Preferences | null>(loadPreferences)
   const [prefsScreen, setPrefsScreen] = useState<'first' | 'edit' | null>(preferences === null ? 'first' : null)
   const paused = sheet !== null || prefsScreen !== null
+  // Until the first preferences screen is done, the scene isn't rendered at all: otherwise a random
+  // model would show through (and load) before the matching one replaces it
+  const firstRun = prefsScreen === 'first'
   const { state, dispatch } = useGame(paused)
   const { phase, outcome } = state
   const close = () => setSheet(null)
@@ -75,7 +78,7 @@ export default function App() {
     <div className={`app ${prefs.animation ? '' : 'is-still'}`}>
       <main className="phone">
         <section className={`stage ${phase === 'reveal' ? 'is-revealing' : ''}`}>
-          <Feed
+          {!firstRun && <Feed
             round={state.round}
             phase={phase}
             ambassador={state.ambassador}
@@ -84,8 +87,8 @@ export default function App() {
             paused={paused}
             onSwipeNext={() => dispatch({ type: 'next' })}
             onRevealEnd={() => dispatch({ type: 'revealEnded' })}
-          />
-          <SceneHud state={state} />
+          />}
+          {!firstRun && <SceneHud state={state} />}
 
           {outcome && (phase === 'result' || phase === 'advancing') && (
             <ResultCard key={state.round} outcome={outcome} leaving={phase === 'advancing'} />

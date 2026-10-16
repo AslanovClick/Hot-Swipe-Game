@@ -20,7 +20,8 @@ export function Feed({ round, phase, ambassador, highRisk, hasBet, paused, onSwi
   const offset = phase === 'advancing' ? 1 : 0
   const startY = useRef<number | null>(null)
 
-  const slides = [round - 1, round, round + 1, round + 2]
+  // Before the first round there is no previous scene to keep, so nothing is loaded for it
+  const slides = [round - 1, round, round + 1, round + 2].filter(abs => abs >= 0)
 
   return (
     <div
