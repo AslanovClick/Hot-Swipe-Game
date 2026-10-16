@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { hasPreferences, type LookPrefs } from '../game/scenes'
 import { CheckIcon, CloseIcon, HeartIcon, ShuffleIcon } from './icons'
 
@@ -59,11 +59,14 @@ interface Props {
   // 'first' runs before the game (skipping it keeps the feed fully random); 'edit' is opened from the menu
   mode: 'first' | 'edit'
   onDone: (prefs: Preferences) => void
+  // Called with the picks so far (and the empty set Skip would save), so the scene can preload
+  onDraft?: (prefs: Preferences) => void
   onClose: () => void
 }
 
-export function Onboarding({ initial, mode, onDone, onClose }: Props) {
+export function Onboarding({ initial, mode, onDone, onClose, onDraft }: Props) {
   const [prefs, setPrefs] = useState<Preferences>(initial)
+  useEffect(() => { onDraft?.(prefs) }, [prefs, onDraft])
   const picked = CATEGORIES.filter(c => prefs[c.key] !== null).length
   const complete = picked === CATEGORIES.length
 

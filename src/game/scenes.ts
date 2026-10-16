@@ -144,22 +144,30 @@ export function setLineupPreferences(p: LookPrefs | null, fromRound: number) {
   lineupStart = Math.max(0, fromRound)
 }
 
-function drawModel(round: number, prev: Model | null): Model {
+function drawModel(round: number, prev: Model | null, prefs: LookPrefs | null, start: number): Model {
   // Never the same model twice in a row
   const candidates = MODELS.length > 1 ? MODELS.filter(m => m !== prev) : MODELS
   // The first round with new preferences opens with the best match (an exact one when it exists)
-  if (lineupPrefs && round === lineupStart) {
-    const best = Math.max(...candidates.map(m => matchScore(m, lineupPrefs)))
-    const top = candidates.filter(m => matchScore(m, lineupPrefs) === best)
+  if (prefs && round === start) {
+    const best = Math.max(...candidates.map(m => matchScore(m, prefs)))
+    const top = candidates.filter(m => matchScore(m, prefs) === best)
     return top[Math.floor(hash(round, 1) * top.length)]
   }
-  return weightedModel(hash(round, 1), candidates, lineupPrefs)
+  return weightedModel(hash(round, 1), candidates, prefs)
 }
 
 function lineupModel(round: number): Model {
   if (round < 0) return MODELS[Math.floor(hash(round, 1) * MODELS.length)]
-  while (lineup.length <= round) lineup.push(drawModel(lineup.length, lineup[lineup.length - 1] ?? null))
+  while (lineup.length <= round) {
+    lineup.push(drawModel(lineup.length, lineup[lineup.length - 1] ?? null, lineupPrefs, lineupStart))
+  }
   return lineup[round]
+}
+
+// The model `round` would get if these preferences were applied from that round, without changing
+// the lineup: lets the next scene load while the player is still picking
+export function previewModel(p: LookPrefs | null, round: number): Model {
+  return drawModel(round, round > 0 ? lineupModel(round - 1) : null, hasPreferences(p) ? p : null, round)
 }
 
 // One roll per round, mapped through the active math mode's odds

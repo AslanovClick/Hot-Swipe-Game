@@ -11,7 +11,7 @@ import { ResultCard } from './components/ResultCard'
 import { RulesSheet } from './components/RulesSheet'
 import { StatsSheet } from './components/StatsSheet'
 import { useMusic } from './game/music'
-import { hasPreferences, setLineupPreferences } from './game/scenes'
+import { hasPreferences, previewModel, setLineupPreferences, type Model } from './game/scenes'
 import { useGame } from './game/useGame'
 
 type Sheet = 'menu' | 'rules' | 'ambassadors' | 'history' | 'stats' | null
@@ -37,6 +37,31 @@ function loadPreferences(): Preferences | null {
   // Saved preferences tune the feed from the very first round
   setLineupPreferences(prefs, 0)
   return prefs
+}
+
+// Warms up the scene the first preferences screen will open on: the poster is cached so it shows the
+// moment the scene mounts, and the idle loop starts buffering once all three picks are made
+const warmed = new Set<string>()
+let warmVideo: HTMLVideoElement | null = null
+
+function warmUp(m: Model, video: boolean) {
+  if (!warmed.has(m.poster)) {
+    warmed.add(m.poster)
+    new Image().src = m.poster
+  }
+  if (video && warmVideo?.getAttribute('src') !== m.idle) {
+    warmVideo = document.createElement('video')
+    warmVideo.muted = true
+    warmVideo.preload = 'auto'
+    warmVideo.src = m.idle
+  }
+}
+
+const warmFirstScene = (p: Preferences) => {
+  const complete = Object.values(p).every(v => v !== null)
+  warmUp(previewModel(p, 0), complete)
+  // Skip saves no preferences: the random first scene gets its poster ready too
+  warmUp(previewModel(EMPTY_PREFERENCES, 0), false)
 }
 
 export default function App() {
@@ -147,6 +172,7 @@ export default function App() {
             mode={prefsScreen}
             initial={preferences ?? EMPTY_PREFERENCES}
             onDone={savePreferences}
+            onDraft={prefsScreen === 'first' ? warmFirstScene : undefined}
             onClose={() => setPrefsScreen(null)}
           />
         )}
