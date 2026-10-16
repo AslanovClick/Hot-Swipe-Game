@@ -90,6 +90,13 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .stage { position: absolute; inset: 0; overflow: hidden; }
 
 .feed { position: absolute; inset: 0; touch-action: none; }
+/* Win impact: the scene punches in towards the viewer and settles a touch closer */
+.stage.is-won .feed { animation: scene-punch 700ms var(--ease) both; }
+@keyframes scene-punch {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.045); }
+  100% { transform: scale(1.02); }
+}
 
 .slide {
   position: absolute;
@@ -183,6 +190,13 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   font-variant-numeric: tabular-nums;
 }
 .balance svg { stroke: url(#accent-stroke); filter: drop-shadow(0 0 4px rgba(240, 70, 255, 0.35)); }
+/* The wallet lights up when a win is credited */
+.balance.is-credited { animation: balance-glow 1400ms ease-out both; }
+@keyframes balance-glow {
+  0% { box-shadow: 0 0 0 0 rgba(255, 203, 69, 0); }
+  20% { box-shadow: 0 0 0 2px rgba(255, 203, 69, 0.75), 0 0 24px rgba(255, 203, 69, 0.55); scale: 1.06; }
+  100% { box-shadow: 0 0 0 0 rgba(255, 203, 69, 0); scale: 1; }
+}
 .svg-defs { position: absolute; width: 0; height: 0; }
 
 .balance-delta {
@@ -684,7 +698,7 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   animation: win-flash 800ms ease-out both;
 }
 @keyframes win-flash {
-  12% { opacity: 0.65; }
+  12% { opacity: 0.85; }
   100% { opacity: 0; }
 }
 .is-lose .result-glow {
@@ -712,9 +726,9 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   -webkit-mask-image: radial-gradient(circle, #000 0, rgba(0, 0, 0, 0.6) 22%, transparent 58%);
   mask-image: radial-gradient(circle, #000 0, rgba(0, 0, 0, 0.6) 22%, transparent 58%);
   opacity: 0;
-  animation: rays-in 700ms var(--ease) 100ms both, rays-spin 16s linear infinite;
+  animation: rays-in 700ms var(--ease) 100ms both, rays-spin 12s linear infinite;
 }
-@keyframes rays-in { from { opacity: 0; scale: 0.6; } to { opacity: 0.8; scale: 1; } }
+@keyframes rays-in { from { opacity: 0; scale: 0.4; } to { opacity: 0.95; scale: 1; } }
 @keyframes rays-spin { to { rotate: 360deg; } }
 
 /* Double shockwave ring at the moment of the win */
@@ -759,6 +773,27 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   to { opacity: 0; transform: scale(3); }
 }
 
+/* Confetti drifting down over the scene */
+.confetti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.confetti-bit {
+  position: absolute;
+  top: -20px;
+  border-radius: 2px;
+  opacity: 0;
+  animation-name: confetti-fall;
+  animation-timing-function: cubic-bezier(0.3, 0.5, 0.6, 1);
+  animation-fill-mode: both;
+}
+.confetti-bit.tone-pink { background: linear-gradient(135deg, #ff8ad8, #f23cf8); }
+.confetti-bit.tone-white { background: linear-gradient(135deg, #ffffff, #ffd6f3); }
+.confetti-bit.tone-gold { background: linear-gradient(135deg, #fff1b8, #ffcb45); }
+@keyframes confetti-fall {
+  0% { opacity: 0; transform: translate(0, 0) rotate(0deg) rotateY(0deg); }
+  10% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--drift), 70vh) rotate(var(--spin)) rotateY(540deg); }
+}
+
 /* Glints around the title */
 .sparkles { position: absolute; inset: 0; pointer-events: none; }
 .sparkle {
@@ -794,7 +829,7 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   -webkit-background-clip: text; background-clip: text;
   color: transparent;
 }
-.win-title { font-size: 50px; letter-spacing: 1px; white-space: nowrap; }
+.win-title { font-size: 54px; letter-spacing: 1px; white-space: nowrap; }
 /* Letters drop in one after another, then the streak rolls across them as a wave */
 .win-letter {
   display: inline-block;

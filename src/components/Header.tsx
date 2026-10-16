@@ -60,7 +60,8 @@ export function Header({ balance, delta, history, ambassador, onMenu, onInfo, on
 
         <div className="header-actions">
           <button className="hbtn" onClick={onInfo} aria-label="How to play"><InfoIcon /></button>
-          <div className="hbtn balance" aria-label="Balance">
+          {/* Keyed by the credited amount so the glow replays on every win */}
+          <div key={delta && delta > 0 ? `won-${delta}` : 'idle'} className={`hbtn balance ${delta && delta > 0 ? 'is-credited' : ''}`} aria-label="Balance">
             {/* Accent gradient for the wallet stroke, same stops as the CTA buttons */}
             <svg width="0" height="0" className="svg-defs" aria-hidden>
               <defs>
