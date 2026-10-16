@@ -32,7 +32,7 @@ export function AmbassadorSheet({ current, stake, onSelect, onClose }: Props) {
           </div>
 
           <div className="amb-hero">
-            <video src={confirm.poster} muted playsInline preload="metadata" style={{ objectPosition: `center ${confirm.heroY}%` }} />
+            <img src={confirm.poster} alt="" draggable={false} style={{ objectPosition: `center ${confirm.heroY}%` }} />
             <span className="amb-hero-shade" />
             <span className="amb-tile-official"><VerifiedIcon size={11} /> Official ambassador</span>
             <span className="amb-hero-info">
@@ -90,7 +90,7 @@ export function AmbassadorSheet({ current, stake, onSelect, onClose }: Props) {
                   style={{ animationDelay: `${i * 70}ms` }}
                   onClick={() => setFocus(m.id)}
                 >
-                  <video className="amb-tile-photo" src={m.poster} muted playsInline preload="metadata" />
+                  <img className="amb-tile-photo" src={m.poster} alt="" draggable={false} />
                   <span className="amb-tile-shade" />
                   <span className="amb-tile-official"><VerifiedIcon size={11} /> Official</span>
                   <span className="amb-tile-info">

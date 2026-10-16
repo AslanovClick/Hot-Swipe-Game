@@ -22,7 +22,7 @@ export function SceneHud({ state }: { state: GameState }) {
       <ModelInfo round={state.round} phase={state.phase} ambassador={state.ambassador} />
       {ambassador && (
         <span className="amb-badge">
-          <span className="amb-badge-photo"><video src={ambassador.poster} muted playsInline preload="metadata" /></span>
+          <span className="amb-badge-photo"><img src={ambassador.poster} alt="" draggable={false} /></span>
           <span className="amb-badge-text">
             <b>{ambassador.name}</b>
             <small>Bet ×{AMBASSADOR_COST_MULT}</small>

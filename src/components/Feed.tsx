@@ -119,6 +119,8 @@ function SlideVideo({ model, result, preload, idlePlaying, revealShown, revealPl
         ref={idle}
         className={`clip clip-idle ${revealShown ? 'is-hidden' : ''}`}
         src={model.idle}
+        // Still first frame until the loop can play (slow network, autoplay blocked in low power mode)
+        poster={model.poster}
         aria-label={`${model.name}, ${model.age}`}
         muted
         playsInline

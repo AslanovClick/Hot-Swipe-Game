@@ -1,9 +1,10 @@
 import { COLORS, modeFor, resultWeights, type Color } from './config'
 
-export type Country = 'es' | 'us' | 'gb' | 'ae' | 'jp' | 'kr' | 'th'
+export type Country = 'es' | 'us' | 'gb' | 'ae' | 'jp' | 'kr' | 'th' | 'ng' | 'gh' | 'fr'
 
 export const COUNTRY_NAME: Record<Country, string> = {
   es: 'Spain', us: 'USA', gb: 'UK', ae: 'UAE', jp: 'Japan', kr: 'South Korea', th: 'Thailand',
+  ng: 'Nigeria', gh: 'Ghana', fr: 'France',
 }
 
 // Looks the feed is tuned by; the same ids the preferences screen offers
@@ -32,7 +33,7 @@ export interface Model {
   ambassador: boolean
   idle: string
   reveal: Record<Color, string>
-  // Still frame for cards (media fragment: first second of the idle loop)
+  // First frame of the idle loop as an image: shown while the video loads, and on cards
   poster: string
   // Vertical crop (object-position %) for the wide ambassador photo, so the face stays in frame
   heroY: number
@@ -53,7 +54,7 @@ const model = (
     ambassador,
     idle: `${dir}/idle.mp4`,
     reveal: { black: `${dir}/black.mp4`, red: `${dir}/red.mp4`, white: `${dir}/white.mp4` },
-    poster: `${dir}/idle.mp4#t=1`,
+    poster: `${dir}/poster.webp`,
     heroY,
   }
 }
@@ -81,6 +82,16 @@ export const MODELS: Model[] = [
   model(['asian', 'chestnut', 'slim'], 'Jisoo', 22, 'Seoul, South Korea', 'kr'), // balcony over a skyline
   model(['asian', 'chestnut', 'athletic'], 'Minji', 24, 'Incheon, South Korea', 'kr'),
   model(['asian', 'chestnut', 'curvy'], 'Leah', 25, 'San Diego, USA', 'us'), // tennis court with palms
+
+  model(['african', 'blonde', 'slim'], 'Amara', 22, 'Lagos, Nigeria', 'ng'),
+  model(['african', 'blonde', 'athletic'], 'Zuri', 23, 'Accra, Ghana', 'gh'),
+  model(['african', 'blonde', 'curvy'], 'Nia', 25, 'Atlanta, USA', 'us'),
+  model(['african', 'brunette', 'slim'], 'Imani', 21, 'Paris, France', 'fr'),
+  model(['african', 'brunette', 'athletic'], 'Ayana', 24, 'Houston, USA', 'us'),
+  model(['african', 'brunette', 'curvy'], 'Kemi', 24, 'Abuja, Nigeria', 'ng'),
+  model(['african', 'chestnut', 'slim'], 'Ada', 22, 'London, UK', 'gb'),
+  model(['african', 'chestnut', 'athletic'], 'Esi', 23, 'Kumasi, Ghana', 'gh'),
+  model(['african', 'chestnut', 'curvy'], 'Tia', 25, 'Chicago, USA', 'us'),
 ]
 
 export const AMBASSADORS = MODELS.filter(m => m.ambassador)

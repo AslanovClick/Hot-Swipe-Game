@@ -209,6 +209,28 @@ export const Flag = ({ code, size = 18 }: { code: Country; size?: number }) => {
             ))}
           </>
         )}
+        {code === 'ng' && (
+          <>
+            <rect width="20" height="14" fill="#fff" />
+            <rect width="6.67" height="14" fill="#008751" />
+            <rect x="13.33" width="6.67" height="14" fill="#008751" />
+          </>
+        )}
+        {code === 'gh' && (
+          <>
+            <rect width="20" height="14" fill="#006b3f" />
+            <rect width="20" height="9.33" fill="#fcd116" />
+            <rect width="20" height="4.67" fill="#ce1126" />
+            <path d="M10 4.9l.62 1.9h2l-1.62 1.18.62 1.9L10 8.7l-1.62 1.18.62-1.9L7.38 6.8h2z" fill="#000" />
+          </>
+        )}
+        {code === 'fr' && (
+          <>
+            <rect width="20" height="14" fill="#fff" />
+            <rect width="6.67" height="14" fill="#0055a4" />
+            <rect x="13.33" width="6.67" height="14" fill="#ef4135" />
+          </>
+        )}
         {code === 'th' && (
           <>
             <rect width="20" height="14" fill="#a51931" />
