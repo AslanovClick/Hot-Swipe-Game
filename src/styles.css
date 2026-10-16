@@ -89,19 +89,7 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
 .stage { position: absolute; inset: 0; overflow: hidden; }
 
-.feed {
-  position: absolute;
-  inset: 0;
-  touch-action: none;
-  /* Own GPU layer, scaled as a whole: no per-frame re-raster or pixel snapping while zooming */
-  will-change: transform;
-  backface-visibility: hidden;
-  transform: translateZ(0) scale(1);
-  transition: transform 700ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-/* On a win the scene drifts a little closer at an even pace for the whole result screen,
-   then eases back as the next one slides in */
-.stage.is-won .feed { transform: translateZ(0) scale(1.05); transition: transform 2600ms cubic-bezier(0.3, 0, 0.5, 1); }
+.feed { position: absolute; inset: 0; touch-action: none; }
 
 .slide {
   position: absolute;
@@ -120,10 +108,19 @@ button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   object-position: center 30%;
   pointer-events: none;
   background: var(--bg);
+  /* Each video is its own GPU layer, so the win zoom scales it without re-rasterising */
+  will-change: transform;
+  transform: translateZ(0) scale(1);
 }
-.clip-reveal { opacity: 0; transition: opacity 250ms ease; }
+/* On a win the video drifts a little closer inside the slide's fixed frame (the slide clips the
+   edges), at an even pace for the whole result screen; it eases back as the next one slides in */
+.stage.is-won .slide.is-current .clip {
+  transform: translateZ(0) scale(1.05);
+  transition: transform 2600ms cubic-bezier(0.3, 0, 0.5, 1), opacity 250ms ease;
+}
+.clip-reveal { opacity: 0; transition: opacity 250ms ease, transform 700ms cubic-bezier(0.4, 0, 0.2, 1); }
 .clip-reveal.is-shown { opacity: 1; }
-.clip-idle { transition: opacity 250ms ease; }
+.clip-idle { transition: opacity 250ms ease, transform 700ms cubic-bezier(0.4, 0, 0.2, 1); }
 .clip-idle.is-hidden { opacity: 0; }
 
 .scrim-top {
